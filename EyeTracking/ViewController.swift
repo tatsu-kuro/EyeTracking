@@ -4,14 +4,19 @@
 //
 //  Created by Ken Kuroda on 8/28/22.
 //
-
 import UIKit
+import AVFoundation
+import AssetsLibrary
+import Photos
+import MessageUI
 import ARKit
 import os
 
 final class ViewController: UIViewController {
+    let iroiro = myFunctions()
+    var eyeVelocityX = Array<CGFloat>()
+    var faceVelocityX = Array<CGFloat>()
     @IBOutlet weak var saveButton: UIButton!
-    
     @IBOutlet weak var vhitBoxView: UIImageView!
     @IBOutlet weak var waveBoxView: UIImageView!
     @IBOutlet weak var helpButton: UIButton!
@@ -55,6 +60,8 @@ final class ViewController: UIViewController {
     }
     override func viewDidLoad() {
         super.viewDidLoad()
+        eyeVelocityX.removeAll()
+        faceVelocityX.removeAll()
         displayLink = CADisplayLink(target: self, selector: #selector(self.update))
         displayLink!.preferredFramesPerSecond = 120
         drawCircle(cPoint:CGPoint(x:view.bounds.width/2,y:view.bounds.height/2),10,UIColor.red.cgColor)
@@ -78,14 +85,21 @@ final class ViewController: UIViewController {
         let y0=view.bounds.height/4-50
         let dy:CGFloat=50
         if faceAnchorFlag==true{
+            faceVelocityX.append(faceHorizon)
+            eyeVelocityX.append(leftEyeHorizon)
             drawCircle(cPoint:CGPoint(x:view.bounds.width/2+faceHorizon,y:y0),30,UIColor.red.cgColor)
             drawCircle(cPoint:CGPoint(x:view.bounds.width/2+leftEyeHorizon,y:y0+dy),30,UIColor.red.cgColor)
         }else{
+            faceVelocityX.append(faceHorizon)
+            eyeVelocityX.append(leftEyeHorizon)
             drawCircle(cPoint:CGPoint(x:view.bounds.width/2+faceHorizon,y:y0),30,UIColor.brown.cgColor)
             drawCircle(cPoint:CGPoint(x:view.bounds.width/2+leftEyeHorizon,y:y0+dy),30,UIColor.brown.cgColor)
         }
+        if faceVelocityX.count>60*60*5{//5min
+            faceVelocityX.remove(at: 0)
+            eyeVelocityX.remove(at: 0)
+        }
     }
-    let iroiro = myFunctions()
 
     func setButtons(){
         let top=CGFloat(UserDefaults.standard.float(forKey: "top"))
@@ -94,33 +108,17 @@ final class ViewController: UIViewController {
         let vw=view.bounds.width
         let sp=vw/36
         let bw=vw/6
-        let bh=bw/2
+        let bh=bw*2/3
         let by=view.bounds.height-bottom-sp-bh
-        let sliderHeight:CGFloat=20
-        let sliderY=by-sp*2-sliderHeight
-//        UserDefaults.standard.set(sliderY, forKey: "sliderY")
- 
-//        var bw=(ww-30)/4*//vhit,camera,vogのボタンの幅
-//        let distance:CGFloat=4//最下段のボタンとボタンの距離
-        
-//        let bh:CGFloat=(ww-20-6*distance)/7//最下段のボタンの高さ、幅と同じ
-//        let bh1=bottomY-5-bh-bh//2段目
-//        let bh2=bottomY-10-2.9*bh//videoSlider
-//        backButton.layer.cornerRadius = 5
-//        nextButton.layer.cornerRadius = 5
-//        videoSlider.frame = CGRect(x: 10, y:bh2, width: ww - 20, height: bh)
-//        videoSlider.thumbTintColor=UIColor.systemYellow
-//        waveSlider.frame = CGRect(x: 10, y:bh2, width: ww - 20, height: bh)
-//        waveSlider.thumbTintColor=UIColor.systemBlue
-//        bw=bh//bhは冒頭で決めている。上２段のボタンの高さと同じ。
-//        let bwd=bw+distance
-//        let bh0=bottomY-bh//wh-10-bw/2
         iroiro.setButtonProperty(mailButton,x:sp*1+bw*0,y:by,w:bw,h:bh,UIColor.systemBlue)
         iroiro.setButtonProperty(saveButton,x:sp*2+bw*1,y:by,w:bw,h:bh,UIColor.systemBlue)
         iroiro.setButtonProperty(clearButton,x:sp*3+bw*2,y:by,w:bw,h:bh,UIColor.systemBlue)
         iroiro.setButtonProperty(settingButton,x:sp*4+bw*3,y:by,w:bw,h: bh,UIColor.systemBlue)
         iroiro.setButtonProperty(helpButton,x:sp*5+bw*4,y:by,w:bw,h: bh,UIColor.systemBlue)
-        waveSlider.frame=CGRect(x:sp,y:sliderY,width: vw-sp*2,height:20)
+        waveSlider.frame=CGRect(x:sp,y:by-bh,width: vw-sp*2,height:20)//とりあえず
+        let sliderHeight=waveSlider.frame.height
+        let sliderY=by-sp*2-sliderHeight
+        waveSlider.frame=CGRect(x:sp,y:sliderY,width: vw-sp*2,height:sliderHeight)
         waveBoxView.frame=CGRect(x:0,y:sliderY-vw*180/320-sp*2,width:vw,height: vw*180/320)
         vhitBoxView.frame=CGRect(x:0,y:sliderY-vw*180/320-sp*2-vw*2/5-sp*2,width :vw,height:vw*2/5)
     }
@@ -478,20 +476,8 @@ extension ViewController: ARSessionDelegate {
     }
      */
     /*
-    @objc func update_vHIT(tm: Timer) {
+    func update_vHIT(tm: Timer) {
         
-        if matchingTestMode==true{
-            if calcFlag == false{
-                timerCalc.invalidate()
-                setButtons(mode: true)
-                setVideoButtons(mode: true)
-                videoSlider.isEnabled=true
-                nextButton.isHidden=false
-                backButton.isHidden=false
-                matchingTestMode=false
-            }
-            return
-        }
         arrayDataCount = getArrayData()
         if arrayDataCount < 5 {
             return
@@ -504,13 +490,7 @@ extension ViewController: ARSessionDelegate {
             setButtons(mode: true)
             //  }
             UIApplication.shared.isIdleTimerDisabled = false
-            //            makeBoxies()
-            //            calcDrawVHIT()
-            //終わり直前で認識されたvhitdataが認識されないこともあるかもしれないので、駄目押し。だめ押し用のcalcdrawvhitは別に作る必要があるかもしれない。
-//            print("facevelo x:",faceVeloXFiltered4update.count)
-//            print("facevelo y:",faceVeloYFiltered4update.count)
-//            print("eyevelo x:",eyeVeloXFiltered4update.count)
-            
+             
             averagingData()//結局ここでスムーズになる？
             if self.waveTuple.count > 0{
                 self.nonsavedFlag = true
@@ -529,43 +509,27 @@ extension ViewController: ARSessionDelegate {
         if calcFlag==false{
             drawOnewave(startcount: 0)
         }
-    }*/
-//    func makeBoxies(){
-//        let vw=view.bounds.width
-//        let vh=view.bounds.height
-//        let top=CGFloat(UserDefaults.standard.float(forKey: "top"))
-//        let sliderY=CGFloat(UserDefaults.standard.float(forKey: "sliderY"))
-//        waveBoxView.frame=CGRect(x:0,y:sliderY-vw*180/320-5,width:vw,height: vw*180/320)
-//        vhitBoxView.frame=CGRect(x:0,y:sliderY-vw*180/320-5-vw*2/5-5,width :vw,height:vw*2/5)
-//    }
-/*
+    }
+ 
+
     func drawLine(num:Int, width w:CGFloat,height h:CGFloat) -> UIImage {
         let size = CGSize(width:w, height:h)
         UIGraphicsBeginImageContextWithOptions(size, false, 1.0)
-#if DEBUG
-     print("drawLine:",num,w,h)
-#endif
         // 折れ線にする点の配列
         var pointList0 = Array<CGPoint>()
-//        var pointList1 = Array<CGPoint>()
         var pointList2 = Array<CGPoint>()
-//        var py1:CGFloat?
-//        var point1:CGPoint?
+
         let pointCount = Int(w) // 点の個数
         // xの間隔
         let dx:CGFloat = 1//Int(w)/pointCount
-//        let posXCount=getPosXFilteredCount()// eyeVeloXFiltered.count
         let gyroMovedCnt=gyroMoved.count
-//        let y0=gyroBoxHeight*2/6
         let y1=gyroBoxHeight*3/6
-//        let y2=gyroBoxHeight*4/6
         var py0:CGFloat=0
         var step:Int = 1
         if fpsIs120==true{
             step=2
         }
         for n in stride(from: 1, to: pointCount, by: step){
-//        for n in 1...(pointCount) {
             if num + n < arrayDataCount && num + n < gyroMovedCnt {
                 let px = dx * CGFloat(n)
                  if calcMode==0{
@@ -573,29 +537,16 @@ extension ViewController: ARSessionDelegate {
                 }else{
                     py0 = eyeVeloYFiltered4update[num + n] * CGFloat(eyeRatio)/450.0 + y1
                 }
-//                if faceMark==true{
-//                    if calcMode==0{
-//                        py1 = faceVeloXFiltered4update[num + n] * CGFloat(eyeRatio)/450.0 + y2
-//                    }else{
-//                        py1 = faceVeloYFiltered4update[num + n] * CGFloat(eyeRatio)/450.0 + y2
-//                    }
-//                }
                 let py2 = -gyroMoved[num + n] * CGFloat(gyroRatio)/150.0 + y1
                 let point0 = CGPoint(x: px, y: py0)
-//                if faceMark==true{
-//                    point1 = CGPoint(x: px, y: py1!)
-//                }
+
                 let point2 = CGPoint(x: px, y: py2)
                 pointList0.append(point0)
-//                if faceMark==true{
-//                    pointList1.append(point1!)
-//                }
                 pointList2.append(point2)
             }
         }
         
         // イメージ処理の開始
-//        UIGraphicsBeginImageContextWithOptions(size, false, 1.0)
         // パスの初期化
         let drawPath0 = UIBezierPath()
         let drawPath1 = UIBezierPath()
@@ -608,15 +559,6 @@ extension ViewController: ARSessionDelegate {
         for pt in pointList0 {
             drawPath0.addLine(to: pt)
         }
-//        if faceMark==true{
-//            drawPath1.move(to: pointList1[0])
-//            // 配列から始点の値を取り除く
-//            pointList1.removeFirst()
-//            // 配列から点を取り出して連結していく
-//            for pt in pointList1 {
-//                drawPath1.addLine(to: pt)
-//            }
-//        }
         drawPath2.move(to: pointList2[0])
         // 配列から始点の値を取り除く
         pointList2.removeFirst()
@@ -633,10 +575,7 @@ extension ViewController: ARSessionDelegate {
         // 線を描く
         UIColor.red.setStroke()
         drawPath0.stroke()
-//        if faceMark == true{
-//            UIColor.black.setStroke()
-//            drawPath1.stroke()
-//        }
+
         UIColor.black.setStroke()
         drawPath2.stroke()
         let timetxt:String = String(format: "%05df (%.1fs/%@) : %ds",arrayDataCount,CGFloat(arrayDataCount)/240.0,videoDura[videoCurrent],timercnt+1)
@@ -652,10 +591,7 @@ extension ViewController: ARSessionDelegate {
         return image!
     }
      func drawRealwave(){//vHIT_eye_head
-//         if gyroLineView != nil{//これが無いとエラーがでる。
-//             gyroLineView?.removeFromSuperview()
-//             //            lineView?.isHidden = false
-//         }
+
          var startcnt:Int
          if arrayDataCount < Int(self.view.bounds.width){//横幅以内なら０からそこまで表示
              startcnt = 0
@@ -666,22 +602,14 @@ extension ViewController: ARSessionDelegate {
          let drawImage = drawLine(num:startcnt,width:self.view.bounds.width,height:gyroBoxHeight)//180)
          // イメージビューに設定する
          waveBoxView = UIImageView(image: drawImage)
-         //       lineView?.center = self.view.center
-//         gyroLineView?.center = CGPoint(x:view.bounds.width/2,y:gyroBoxYcenter)//340)//ここらあたりを変更se~7plusの大きさにも対応できた。
-//         view.addSubview(gyroLineView!)
-         //      showBoxies(f: true)
-         //        print("count----" + "\(view.subviews.count)")
-     }
+      }
      
      func drawOnewave(startcount:Int){//vHIT_eye_head
          var startcnt = startcount
          if startcnt < 0 {
              startcnt = 0
          }
-         if gyroLineView != nil{//これが無いとエラーがでる。
-             gyroLineView?.removeFromSuperview()
-             //            lineView?.isHidden = false
-         }
+       
  //        let posXCount=getPosXFilteredCount()
          if arrayDataCount < Int(self.view.bounds.width){//横幅以内なら０からそこまで表示
              startcnt = 0
@@ -691,12 +619,8 @@ extension ViewController: ARSessionDelegate {
          //波形を時間軸で表示
          let drawImage = drawLine(num:startcnt,width:self.view.bounds.width,height:gyroBoxHeight)// 180)
          // イメージビューに設定する
-         gyroLineView = UIImageView(image: drawImage)
+         waveBoxView = UIImageView(image: drawImage)
          //       lineView?.center = self.view.center
-         gyroLineView?.center = CGPoint(x:view.bounds.width/2,y:gyroBoxYcenter)// 340)
-         //ここらあたりを変更se~7plusの大きさにも対応できた。
-         view.addSubview(gyroLineView!)
-         //        print("count----" + "\(view.subviews.count)")
-     }
-     */
+      }
+   */
 }
