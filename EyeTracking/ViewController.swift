@@ -43,8 +43,8 @@ final class ViewController: UIViewController {
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
         return .portrait
     }
+
     func drawCircle(cPoint:CGPoint,_ diameter:CGFloat,_ color:CGColor){
-    
         /* --- 円を描画 --- */
         let circleLayer = CAShapeLayer.init()
         let circleFrame = CGRect.init(x:cPoint.x-diameter/2,y:cPoint.y-diameter/2,width:diameter,height:diameter)
@@ -58,13 +58,10 @@ final class ViewController: UIViewController {
         // 円形を描画
         circleLayer.path = UIBezierPath.init(ovalIn: CGRect.init(x: 0, y: 0, width: circleFrame.size.width, height: circleFrame.size.height)).cgPath
         self.view.layer.addSublayer(circleLayer)
+        print("sublayer2:",view.layer.sublayers?.count)
     }
-    var initDrawOneWave:Bool=true
     func drawOneWave(){
         let endCnt = faceVeloX.count
-        if endCnt<61{
-            return
-        }
         var startCnt = endCnt-60//点の数
        
         if startCnt<0{
@@ -74,15 +71,9 @@ final class ViewController: UIViewController {
         let drawImage = drawLine(startCnt:startCnt,endCnt:endCnt)
         // イメージビューに設定する
         waveBoxView = UIImageView(image: drawImage)
-        if initDrawOneWave==true{
-            view.addSubview(waveBoxView!)
-            initDrawOneWave=false
-        }else{
-//            view.removeFromSuperview()
-            view.addSubview(waveBoxView!)
-        }
+        view.addSubview(waveBoxView!)
      }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         ltEyeVeloX.removeAll()
@@ -116,6 +107,7 @@ final class ViewController: UIViewController {
         }else{
             view.layer.sublayers?.removeLast()
             view.layer.sublayers?.removeLast()
+            view.layer.sublayers?.removeLast()
         }
         let y0:CGFloat=view.bounds.height/4-50
         let dy:CGFloat=50
@@ -135,7 +127,6 @@ final class ViewController: UIViewController {
             faceVeloX.remove(at: 0)
             ltEyeVeloX.remove(at: 0)
         }
-
         drawOneWave()
     }
 
@@ -292,27 +283,27 @@ extension ViewController: ARSessionDelegate {
         // 折れ線にする点の配列
         var pointList1 = Array<CGPoint>()
         var pointList2 = Array<CGPoint>()
-
         let pointCount:CGFloat = 60 // 点の個数
         // xの間隔
         let dx:CGFloat = view.bounds.width/pointCount
-//        let gyroMovedCnt=face.count
         let y1=view.bounds.width*18/32*2/6
         let y2=view.bounds.width*18/32*4/6
         var py1:CGFloat=0
         var py2:CGFloat=0
-      
-        for n in startCnt-1..<endCnt{//stride(from: 1, to: pointCount, by: step){
-                let px = dx * CGFloat(n-startCnt+1)
-                py1 = faceVeloX[n] * 300 + y1
-                py2 = ltEyeVeloX[n] * 300 + y2
-                let point1 = CGPoint(x: px, y: py1)
-                let point2 = CGPoint(x: px, y: py2)
-                pointList1.append(point1)
-                pointList2.append(point2)
-//            }
+        if endCnt<5{
+            
+        }else{
+        for n in startCnt..<endCnt{
+            let px = dx * CGFloat(n-startCnt)
+            py1 = faceVeloX[n] * 300 + y1
+            py2 = ltEyeVeloX[n] * 300 + y2
+            let point1 = CGPoint(x: px, y: py1)
+            let point2 = CGPoint(x: px, y: py2)
+            pointList1.append(point1)
+            pointList2.append(point2)
         }
-        print("count:",startCnt,endCnt,pointList1.count)
+    
+//        print("count:",startCnt,endCnt,pointList1.count)
         // イメージ処理の開始
         // パスの初期化
         let drawPath1 = UIBezierPath()
@@ -348,7 +339,7 @@ extension ViewController: ARSessionDelegate {
 //        timetxt.draw(at: CGPoint(x: 3, y: 3), withAttributes: [
 //            NSAttributedString.Key.foregroundColor : UIColor.black,
 //            NSAttributedString.Key.font : UIFont.monospacedDigitSystemFont(ofSize: 13, weight: UIFont.Weight.regular)])
-        
+        }
         //イメージコンテキストからUIImageを作る
         let image = UIGraphicsGetImageFromCurrentImageContext()
         // イメージ処理の終了
