@@ -179,21 +179,13 @@ final class ViewController: UIViewController {
         //        }
         setButtons()
     }
-    var currWavePoint:Int=0
-//    var initSliderValueChange:Bool=true
+
     @objc func onWaveSliderValueChange(){
-        currWavePoint=Int(waveSlider.value*(waveSlider.maximumValue-Float(view.bounds.width))/waveSlider.maximumValue)
-//        if initSliderValueChange==true{
-//            initSliderValueChange=false
-//        }else{
-            view.layer.sublayers?.removeLast()
-//        }
-        var endCnt = currWavePoint
-        if endCnt<60{
-            endCnt=60
-        }
-        var startCnt = endCnt-60//点の数
-       
+        let endCnt=Int(waveSlider.value)
+        view.layer.sublayers?.removeLast()
+        
+        let startCnt = endCnt-60//点の数
+        
         //波形を時間軸で表示
         let drawImage = drawLine(startCnt:startCnt,endCnt:endCnt)
         // イメージビューに設定する
@@ -202,9 +194,7 @@ final class ViewController: UIViewController {
     }
     
     func setWaveSlider(){
-//        setVideoButtons(mode: false)
-        waveSlider.minimumValue = 0
-        //count==0の時もエラーにならないのでそのまま
+        waveSlider.minimumValue = 60
         waveSlider.maximumValue = Float(faceVeloX.count)
         waveSlider.value=Float(faceVeloX.count)
         waveSlider.addTarget(self, action: #selector(onWaveSliderValueChange), for: UIControl.Event.valueChanged)
