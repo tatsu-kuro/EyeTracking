@@ -59,6 +59,7 @@ final class ViewController: UIViewController {
         circleLayer.path = UIBezierPath.init(ovalIn: CGRect.init(x: 0, y: 0, width: circleFrame.size.width, height: circleFrame.size.height)).cgPath
         self.view.layer.addSublayer(circleLayer)
     }
+    var initDrawOneWave:Bool=true
     func drawOneWave(){
         let endCnt = faceVeloX.count
         if endCnt<61{
@@ -73,8 +74,15 @@ final class ViewController: UIViewController {
         let drawImage = drawLine(startCnt:startCnt,endCnt:endCnt)
         // イメージビューに設定する
         waveBoxView = UIImageView(image: drawImage)
-        view.addSubview(waveBoxView!)
+        if initDrawOneWave==true{
+            view.addSubview(waveBoxView!)
+            initDrawOneWave=false
+        }else{
+//            view.removeFromSuperview()
+            view.addSubview(waveBoxView!)
+        }
      }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         ltEyeVeloX.removeAll()
@@ -108,20 +116,10 @@ final class ViewController: UIViewController {
         }else{
             view.layer.sublayers?.removeLast()
             view.layer.sublayers?.removeLast()
-//            view.layer.sublayers?.removeLast()
         }
         let y0:CGFloat=view.bounds.height/4-50
         let dy:CGFloat=50
-//        let faceXTemp:CGFloat=faceX
-//        let rtEyeXTemp:CGFloat=rtEyeX
-//        let ltEyeXTemp:CGFloat=ltEyeX
-//        let faceVeloX0:CGFloat=faceXTemp-lastFaceX
-//        let rtEyeVeloX0:CGFloat=rtEyeXTemp-lastRtEyeX
-//        let ltEyeVeloX0:CGFloat=ltEyeXTemp-lastLtEyeX
-//        lastFaceX=faceXTemp
-//        lastLtEyeX=ltEyeXTemp
-//        lastRtEyeX=rtEyeXTemp
-        
+
         if faceAnchorFlag==true{//} && faceAnchorFlag == lastFlag{
             faceVeloX.append(faceVeloX0)
             ltEyeVeloX.append(ltEyeVeloX0)
@@ -137,7 +135,7 @@ final class ViewController: UIViewController {
             faceVeloX.remove(at: 0)
             ltEyeVeloX.remove(at: 0)
         }
-//        lastFlag=faceAnchorFlag
+
         drawOneWave()
     }
 
