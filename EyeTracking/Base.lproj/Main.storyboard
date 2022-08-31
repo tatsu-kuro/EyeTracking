@@ -63,16 +63,6 @@
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="plain" image="questionmark.circle" catalog="system"/>
                             </button>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="l3U-1V-e37">
-                                <rect key="frame" x="87" y="535" width="240" height="128"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <color key="backgroundColor" white="0.66666666669999997" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                            </imageView>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="PXM-CN-LH3">
-                                <rect key="frame" x="76" y="340" width="240" height="128"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <color key="backgroundColor" systemColor="systemYellowColor"/>
-                            </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -87,8 +77,6 @@
                         <outlet property="mailButton" destination="u8R-5m-KZ9" id="NBj-D1-fd6"/>
                         <outlet property="saveButton" destination="Th0-5C-u7H" id="Zfb-pA-Y6x"/>
                         <outlet property="settingButton" destination="U5i-dq-oJP" id="XpC-y7-xyy"/>
-                        <outlet property="vhitBoxView" destination="PXM-CN-LH3" id="xcJ-6V-0Ym"/>
-                        <outlet property="waveBoxView" destination="l3U-1V-e37" id="4vV-jn-ltw"/>
                         <outlet property="waveSlider" destination="IUx-MW-Vmg" id="Uq7-bc-0vS"/>
                     </connections>
                 </viewController>
@@ -108,9 +96,6 @@
         </systemColor>
         <systemColor name="systemBlueColor">
             <color red="0.0" green="0.47843137254901963" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </systemColor>
-        <systemColor name="systemYellowColor">
-            <color red="1" green="0.80000000000000004" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>
