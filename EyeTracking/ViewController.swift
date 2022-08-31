@@ -35,13 +35,16 @@ final class ViewController: UIViewController {
     
     var arKitFlag:Bool=true
     @IBAction func onPauseARKitButton(_ sender: Any) {
-        if arKitFlag==true{
+        if arKitFlag==true && dateString.count>60{
             arKitFlag=false
             setWaveSlider()
             waveSlider.isEnabled=true
+            waveSlider.minimumTrackTintColor=UIColor.blue
+
         }else{
             arKitFlag=true
             waveSlider.isEnabled=false
+            waveSlider.minimumTrackTintColor=UIColor.systemGray5
         }
     }
     
@@ -93,6 +96,10 @@ final class ViewController: UIViewController {
         session.delegate = self
         displayLink?.add(to: RunLoop.main, forMode: .common)
         displayLinkF=true
+//        waveSlider.minimumTrackTintColor=UIColor.blue
+        waveSlider.minimumTrackTintColor=UIColor.systemGray5
+        waveSlider.maximumTrackTintColor=UIColor.systemGray5
+
     }
 
     override func viewDidAppear(_ animated: Bool) {
