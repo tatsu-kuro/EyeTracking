@@ -43,6 +43,9 @@
                                 <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="plain" image="playpause" catalog="system"/>
+                                <connections>
+                                    <action selector="onPauseARKitButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="grY-YI-JqT"/>
+                                </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="U5i-dq-oJP">
                                 <rect key="frame" x="269" y="831" width="47" height="31"/>
@@ -72,9 +75,9 @@
                         </constraints>
                     </view>
                     <connections>
-                        <outlet property="clearButton" destination="ukP-5L-4dH" id="c7x-n7-AUB"/>
                         <outlet property="helpButton" destination="qi3-kF-0GR" id="8SN-KL-eQf"/>
                         <outlet property="mailButton" destination="u8R-5m-KZ9" id="NBj-D1-fd6"/>
+                        <outlet property="pauseARKitButton" destination="ukP-5L-4dH" id="c7x-n7-AUB"/>
                         <outlet property="saveButton" destination="Th0-5C-u7H" id="Zfb-pA-Y6x"/>
                         <outlet property="settingButton" destination="U5i-dq-oJP" id="XpC-y7-xyy"/>
                         <outlet property="waveSlider" destination="IUx-MW-Vmg" id="Uq7-bc-0vS"/>
