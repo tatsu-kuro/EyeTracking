@@ -16,6 +16,7 @@ final class ViewController: UIViewController {
     let iroiro = myFunctions()
     var ltEyeVeloX = Array<CGFloat>()
     var faceVeloX = Array<CGFloat>()
+    var dateString = Array<String>()
     @IBOutlet weak var saveButton: UIButton!
     var waveBoxView:UIImageView?
     var vhitBoxView:UIImageView?
@@ -85,6 +86,7 @@ final class ViewController: UIViewController {
         super.viewDidLoad()
         ltEyeVeloX.removeAll()
         faceVeloX.removeAll()
+        dateString.removeAll()
         displayLink = CADisplayLink(target: self, selector: #selector(self.displayLinkUpdate))
         displayLink!.preferredFramesPerSecond = 120
 //        view.addSubview(lookAtPointView)
@@ -123,6 +125,12 @@ final class ViewController: UIViewController {
         let dy:CGFloat=50
 
         if faceAnchorFlag==true{//} && faceAnchorFlag == lastFlag{
+            let date = Date()
+            let df = DateFormatter()
+            df.dateFormat = "yyyy-MM-dd HH:mm:ss"
+//            print(df.string(from: date))
+            // 2019-10-19 17:01:09
+            dateString.append(df.string(from: date))
             faceVeloX.append(faceVeloX0)
             ltEyeVeloX.append(ltEyeVeloX0)
             drawCircle(cPoint:CGPoint(x:view.bounds.width/2+faceVeloX0*100,y:y0),30,UIColor.red.cgColor)
@@ -254,11 +262,11 @@ final class ViewController: UIViewController {
             
             UIColor.black.setStroke()
             drawPath2.stroke()
-            //        let timetxt:String = String(format: "%05df (%.1fs/%@) : %ds",arrayDataCount,CGFloat(arrayDataCount)/240.0,videoDura[videoCurrent],timercnt+1)
-            //        //print(timetxt)
-            //        timetxt.draw(at: CGPoint(x: 3, y: 3), withAttributes: [
-            //            NSAttributedString.Key.foregroundColor : UIColor.black,
-            //            NSAttributedString.Key.font : UIFont.monospacedDigitSystemFont(ofSize: 13, weight: UIFont.Weight.regular)])
+            
+            dateString[endCnt-1].draw(at: CGPoint(x: 3, y: 3), withAttributes: [
+                NSAttributedString.Key.foregroundColor : UIColor.black,
+                NSAttributedString.Key.font : UIFont.monospacedDigitSystemFont(ofSize: 13, weight: UIFont.Weight.regular)])
+            
         }
         //イメージコンテキストからUIImageを作る
         let image = UIGraphicsGetImageFromCurrentImageContext()
