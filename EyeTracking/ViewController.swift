@@ -158,6 +158,7 @@ final class ViewController: UIViewController {
         if faceVeloX.count>60*60*2{//2min
             faceVeloX.remove(at: 0)
             ltEyeVeloX.remove(at: 0)
+            dateString.remove(at: 0)
         }
         drawOneWave()
     }
