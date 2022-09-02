@@ -298,6 +298,7 @@ final class ViewController: UIViewController {
     var moveThumY:CGFloat=0
     var startMultiFace:CGFloat=0
     var startMultiEye:CGFloat=0
+    var startCnt:Int=0
     
     @IBAction func panGesture1(_ sender: UIPanGestureRecognizer) {
         let move:CGPoint = sender.translation(in: self.view)
@@ -317,6 +318,7 @@ final class ViewController: UIViewController {
                 }
                 startMultiEye=multiEye
                 startMultiFace=multiFace
+                startCnt=Int(waveSlider.value)
             }
             
         } else if sender.state == .changed {
@@ -324,6 +326,22 @@ final class ViewController: UIViewController {
                 
                 moveThumX += move.x*move.x
                 moveThumY += move.y*move.y
+                
+                moveThumX += move.x*move.x
+                moveThumY += move.y*move.y
+                if moveThumX>moveThumY{//横移動の和＞縦移動の和
+//                    var endCnt=Int(waveSlider.value)
+                    var endCnt=startCnt + Int(move.x/10)
+                    if endCnt>faceVeloX.count-1{
+                        endCnt=faceVeloX.count-1
+                    }else if endCnt<60{
+                        endCnt=60
+                    }
+//                    print("x:",move.x)
+                    waveSlider.value=Float(endCnt)
+                }else{
+                
+                
                 if tapPosleftRight==0{
                     multiEye=startMultiEye - move.y
                 }else if tapPosleftRight==1{
@@ -344,6 +362,7 @@ final class ViewController: UIViewController {
                 }else if multiEye<10{
                     multiEye=10
                 }
+                }
                 onWaveSliderValueChange()
                 //            drawOnewave(startcount: vhitCurpoint)
             }
@@ -352,7 +371,7 @@ final class ViewController: UIViewController {
             UserDefaults.standard.set(multiFace, forKey: "multiFace")
             UserDefaults.standard.set(multiEye, forKey: "multiEye")
         }
-        print("multiEye:",multiEye,multiFace)
+//        print("multiEye:",multiEye,multiFace)
     }
     
 }
