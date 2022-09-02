@@ -69,10 +69,15 @@
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <gestureRecognizers/>
                         <constraints>
                             <constraint firstAttribute="bottom" secondItem="qi3-kF-0GR" secondAttribute="bottom" constant="33" id="B4k-PV-agi"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="qi3-kF-0GR" secondAttribute="trailing" constant="30" id="QYw-dh-4W7"/>
                         </constraints>
+                        <connections>
+                            <outletCollection property="gestureRecognizers" destination="2LD-c1-guh" appends="YES" id="97l-hL-bf6"/>
+                            <outletCollection property="gestureRecognizers" destination="nsz-Lk-i22" appends="YES" id="q8R-g2-y35"/>
+                        </connections>
                     </view>
                     <connections>
                         <outlet property="helpButton" destination="qi3-kF-0GR" id="8SN-KL-eQf"/>
@@ -84,6 +89,16 @@
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+                <tapGestureRecognizer id="2LD-c1-guh">
+                    <connections>
+                        <action selector="tapGesture:" destination="BYZ-38-t0r" id="LkW-3e-4WW"/>
+                    </connections>
+                </tapGestureRecognizer>
+                <panGestureRecognizer minimumNumberOfTouches="1" id="nsz-Lk-i22">
+                    <connections>
+                        <action selector="panGesture1:" destination="BYZ-38-t0r" id="26l-AK-9Vt"/>
+                    </connections>
+                </panGestureRecognizer>
             </objects>
             <point key="canvasLocation" x="18.840579710144929" y="62.946428571428569"/>
         </scene>

@@ -398,6 +398,14 @@ class myFunctions: NSObject, AVCaptureFileOutputRecordingDelegate{
             return ret
         }
     }
+    func getUserDefaultCGFloat(str:String,ret:CGFloat) -> CGFloat{
+        if (UserDefaults.standard.object(forKey: str) != nil){
+            return CGFloat(UserDefaults.standard.float(forKey: str))
+        }else{//keyが設定してなければretをセット
+            UserDefaults.standard.set(ret, forKey: str)
+            return ret
+        }
+    }
     func getUserDefaultString(str:String,ret:String) -> String{
         if (UserDefaults.standard.object(forKey: str) != nil){
             return UserDefaults.standard.string(forKey:str)!

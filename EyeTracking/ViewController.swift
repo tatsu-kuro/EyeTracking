@@ -14,6 +14,8 @@ import os
 
 final class ViewController: UIViewController {
     let iroiro = myFunctions()
+    var multiEye:CGFloat=100
+    var multiFace:CGFloat=100
     var ltEyeVeloX = Array<CGFloat>()
     var faceVeloX = Array<CGFloat>()
     var dateString = Array<String>()
@@ -33,8 +35,12 @@ final class ViewController: UIViewController {
     var rtEyeX:CGFloat=0
     private let session = ARSession()
     
+    @IBAction func tapGesture(_ sender: UITapGestureRecognizer) {
+        print("tapppppppp")
+    }
     var arKitFlag:Bool=true
     @IBAction func onPauseARKitButton(_ sender: Any) {
+        
         if arKitFlag==true && dateString.count>60{
             arKitFlag=false
             setWaveSlider()
@@ -69,7 +75,7 @@ final class ViewController: UIViewController {
         // 円形を描画
         circleLayer.path = UIBezierPath.init(ovalIn: CGRect.init(x: 0, y: 0, width: circleFrame.size.width, height: circleFrame.size.height)).cgPath
         self.view.layer.addSublayer(circleLayer)
-        print("sublayer2:",view.layer.sublayers?.count)
+//        print("sublayer2:",view.layer.sublayers?.count)
     }
     func drawOneWave(){
         let endCnt = faceVeloX.count
@@ -90,8 +96,11 @@ final class ViewController: UIViewController {
         ltEyeVeloX.removeAll()
         faceVeloX.removeAll()
         dateString.removeAll()
+        multiEye = iroiro.getUserDefaultCGFloat(str: "multiEye", ret: 100)
+        multiFace = iroiro.getUserDefaultCGFloat(str: "multiFace", ret: 100)
+ 
         displayLink = CADisplayLink(target: self, selector: #selector(self.displayLinkUpdate))
-        displayLink!.preferredFramesPerSecond = 120
+        displayLink!.preferredFramesPerSecond = 60//120
 //        view.addSubview(lookAtPointView)
         session.delegate = self
         displayLink?.add(to: RunLoop.main, forMode: .common)
@@ -99,7 +108,6 @@ final class ViewController: UIViewController {
 //        waveSlider.minimumTrackTintColor=UIColor.blue
         waveSlider.minimumTrackTintColor=UIColor.systemGray5
         waveSlider.maximumTrackTintColor=UIColor.systemGray5
-
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -115,7 +123,6 @@ final class ViewController: UIViewController {
     var faceVeloX0:CGFloat=0
     var ltEyeVeloX0:CGFloat=0
     var rtEyeVeloX0:CGFloat=0
-//    var lastFlag:Bool=true
     var initFlag:Bool=true
     @objc func displayLinkUpdate() {
         if arKitFlag==false{
@@ -140,15 +147,15 @@ final class ViewController: UIViewController {
             dateString.append(df.string(from: date))
             faceVeloX.append(faceVeloX0)
             ltEyeVeloX.append(ltEyeVeloX0)
-            drawCircle(cPoint:CGPoint(x:view.bounds.width/2+faceVeloX0*100,y:y0),30,UIColor.red.cgColor)
-            drawCircle(cPoint:CGPoint(x:view.bounds.width/2+ltEyeVeloX0*100,y:y0+dy),30,UIColor.red.cgColor)
+            drawCircle(cPoint:CGPoint(x:view.bounds.width/2+faceVeloX0*multiFace,y:y0),30,UIColor.red.cgColor)
+            drawCircle(cPoint:CGPoint(x:view.bounds.width/2+ltEyeVeloX0*multiEye,y:y0+dy),30,UIColor.red.cgColor)
         }else{//検出できていない時はappendしない
 //            faceVelocityX.append(faceVeloX)
 //            eyeVelocityX.append(ltEyeVeloX)
             drawCircle(cPoint:CGPoint(x:view.bounds.width/2+faceVeloX0,y:y0),30,UIColor.brown.cgColor)
             drawCircle(cPoint:CGPoint(x:view.bounds.width/2+ltEyeVeloX0,y:y0+dy),30,UIColor.brown.cgColor)
         }
-        if faceVeloX.count>60*60*5{//5min
+        if faceVeloX.count>60*60*2{//2min
             faceVeloX.remove(at: 0)
             ltEyeVeloX.remove(at: 0)
         }
@@ -230,8 +237,8 @@ final class ViewController: UIViewController {
         if endCnt>5{
             for n in startCnt..<endCnt{
                 let px = dx * CGFloat(n-startCnt)
-                py1 = faceVeloX[n] * 300 + y1
-                py2 = ltEyeVeloX[n] * 300 + y2
+                py1 = faceVeloX[n] * multiFace + y1
+                py2 = ltEyeVeloX[n] * multiEye + y2
                 let point1 = CGPoint(x: px, y: py1)
                 let point2 = CGPoint(x: px, y: py2)
                 pointList1.append(point1)
@@ -269,17 +276,82 @@ final class ViewController: UIViewController {
             
             UIColor.black.setStroke()
             drawPath2.stroke()
-            
-            dateString[endCnt-1].draw(at: CGPoint(x: 3, y: 3), withAttributes: [
+            var text=dateString[endCnt-1]
+            if arKitFlag==false{
+                text += "  face:" + Int(-faceVeloX[endCnt-1]*10000).description + " eye:" + Int(-ltEyeVeloX[endCnt-1]*10000).description
+            }
+            text.draw(at:CGPoint(x:3,y:3),withAttributes: [
                 NSAttributedString.Key.foregroundColor : UIColor.black,
                 NSAttributedString.Key.font : UIFont.monospacedDigitSystemFont(ofSize: 13, weight: UIFont.Weight.regular)])
-            
         }
         //イメージコンテキストからUIImageを作る
         let image = UIGraphicsGetImageFromCurrentImageContext()
         // イメージ処理の終了
         UIGraphicsEndImageContext()
         return image!
+    }
+
+    var tapPosleftRight:Int=0//left-eye,right=head最初にタップした位置で
+
+    var moveThumX:CGFloat=0
+    var moveThumY:CGFloat=0
+    var startMultiFace:CGFloat=0
+    var startMultiEye:CGFloat=0
+    
+    @IBAction func panGesture1(_ sender: UIPanGestureRecognizer) {
+        let move:CGPoint = sender.translation(in: self.view)
+        if sender.state == .began {
+            moveThumX=0
+            moveThumY=0
+            
+            if sender.location(in: view).y>view.bounds.height*2/5{
+                if sender.location(in: view).x<view.bounds.width/3{
+                    tapPosleftRight=0
+                    print("left")
+                }else if sender.location(in: view).x<view.bounds.width*2/3{
+                    tapPosleftRight=1
+                }else{
+                    tapPosleftRight=2
+                    print("right")
+                }
+                startMultiEye=multiEye
+                startMultiFace=multiFace
+            }
+            
+        } else if sender.state == .changed {
+            if sender.location(in: view).y>view.bounds.height*2/5{
+                
+                moveThumX += move.x*move.x
+                moveThumY += move.y*move.y
+                if tapPosleftRight==0{
+                    multiEye=startMultiEye - move.y
+                }else if tapPosleftRight==1{
+                    multiFace=startMultiFace - move.y
+                    multiEye=startMultiEye - move.y
+                }else{
+                    multiFace=startMultiFace - move.y
+                }
+                
+                if multiFace>4000{
+                    multiFace=4000
+                }else if multiFace<10{
+                    multiFace=10
+                }
+                
+                if multiEye>4000{
+                    multiEye=4000
+                }else if multiEye<10{
+                    multiEye=10
+                }
+                onWaveSliderValueChange()
+                //            drawOnewave(startcount: vhitCurpoint)
+            }
+            
+        }else if sender.state == .ended{
+            UserDefaults.standard.set(multiFace, forKey: "multiFace")
+            UserDefaults.standard.set(multiEye, forKey: "multiEye")
+        }
+        print("multiEye:",multiEye,multiFace)
     }
     
 }
