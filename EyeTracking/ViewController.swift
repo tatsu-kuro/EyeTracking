@@ -837,10 +837,12 @@ final class ViewController: UIViewController {
         }
 //        print("multiEye:",multiEye,multiFace)
     }
-    
+
+    var lastTime=CFAbsoluteTimeGetCurrent()
 }
 
 extension ViewController: ARSessionDelegate {
+ 
     func session(_ session: ARSession, didUpdate frame: ARFrame) {
         guard let faceAnchor = frame.anchors.first(where: { $0 is ARFaceAnchor }) as? ARFaceAnchor else {
             return
@@ -855,7 +857,10 @@ extension ViewController: ARSessionDelegate {
         lastFaceX=faceXTemp
         lastLtEyeX=ltEyeXTemp
         lastRtEyeX=rtEyeXTemp
-        
+        let lag=CFAbsoluteTimeGetCurrent()-lastTime
+//        print(lag)
+        lastTime=CFAbsoluteTimeGetCurrent()
+
         //        let logger = Logger()
         //face, rightEye, leftEyeのx,y軸方向の回転角を出力
         //        logger.log("fh=\(asin(faceAnchor.transform.columns.2.x))")//",fv=\(asin(faceAnchor.transform.columns.1.z))")
