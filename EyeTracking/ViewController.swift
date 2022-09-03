@@ -42,15 +42,20 @@ final class ViewController: UIViewController {
 
     struct wave {
         var isRight : Bool
+        var frameN : Int
         var dispOn : Bool
         var currDispOn : Bool
-        var eye = [Int](repeating:0,count:125)
-        var face = [Int](repeating:0,count:125)
+        var eye = [CGFloat](repeating:0,count:31)
+        var face = [CGFloat](repeating:0,count:31)
     }
     var vHITwaves = [wave]()
+    var vHITwave = [CGFloat](repeating: 0, count: 31)
+    func append_vHITwaves(isRight:Bool,frameN:Int,dispOn:Bool,currDispOn:Bool){
+        let temp=wave(isRight: isRight,frameN: frameN, dispOn: dispOn, currDispOn: currDispOn,eye:vHITwave,face:vHITwave)
+        vHITwaves.append(temp)
+    }
     func init_vHITwaves(num:Int){
-        let tempInt=[Int](repeating: 0, count: 125)
-        let temp=wave(isRight: true, dispOn: true, currDispOn: true,eye:tempInt,face:tempInt)
+        let temp=wave(isRight: true,frameN: 0, dispOn: true, currDispOn: true,eye:vHITwave,face:vHITwave)
         for _ in 0...num{
             vHITwaves.append(temp)
         }
@@ -60,47 +65,98 @@ final class ViewController: UIViewController {
         print(vHITwaves[0])
         print(vHITwaves[1])
     }
-//    struct Person {
-//        var isRt : Bool
-//        var dispOn : Bool
-//        var curDispOn :Bool
-//        var frameNum : Int
-//        let waves = [Int](repeating: Int, count: 125)
-//    }
-//    var persons : [Person] = []
-//    func temp(){
-//
-//        persons.append(Person(isRt:false,dispOn:false,curDispOn: false,frameNum: 23,waves:[repeating:12,count:125]) "Taro", age : 20))
-//    persons.append(Person(name: "Jiro", age : 17))
-//    persons.append(Person(name: "Saburo", age : 10))
-//    }
-    //    var lastVhitpoint:Int = -2//これはなんだろう→あとでチェック！！！
-//    func onWaveSliderValueChange1(){
-////vhit
-//        let vhitCurpoint = Int(waveSlider.value*(waveSlider.maximumValue-Float(view.bounds.width))/waveSlider.maximumValue)
-////        drawOnewave(startcount: vhitCurpoint)
-//        lastVhitpoint = vhitCurpoint
-//        if waveTuple.count>0{
-//            //setするだけか？
-//            checksetPos(pos: lastVhitpoint + Int(self.view.bounds.width/2), mode:1)
-////            drawVHITwaves()
+//    func g5(st:Int)->CGFloat{
+//        if st>3 && st<gyroMoved.count-2{
+//            return(gyroMoved[st-2]+gyroMoved[st-1]+gyroMoved[st]+gyroMoved[st+1]+gyroMoved[st+2])*2.0
 //        }
+//        return 0
 //    }
- /*   func checksetPos(pos:Int,mode:Int) -> Int{
-        let cnt=waveTuple.count
+    
+    func upDownp(i:Int)->Int{//60hz -> 16.7ms
+//        let waveWidth:Int=80 vhitPeakまで
+//        let widthRange:Int=30
+        let naf:Int=5//84ms  waveWidth*60/1000
+        let raf:Int=2//33ms  widthRange*60/1000
+        let sl:CGFloat=0//slope
+        let g1=faceVeloX[i+1]-faceVeloX[i]// st:i+1)-g5(st:i)
+        let g2=faceVeloX[i+2]-faceVeloX[i+1]// st:i+1)-g5(st:i)
+        let g3=faceVeloX[i+3]-faceVeloX[i+2]// st:i+1)-g5(st:i)
+        let ga=faceVeloX[i+naf-raf+1]-faceVeloX[i+naf-raf]// st:i+1)-g5(st:i)
+        let gb=faceVeloX[i+naf-raf+2]-faceVeloX[i+naf-raf+1]// st:i+1)-g5(st:i)
+        let gc=faceVeloX[i+naf+raf+1]-faceVeloX[i+naf+raf]// st:i+1)-g5(st:i)
+        let gd=faceVeloX[i+naf+raf+2]-faceVeloX[i+naf+raf+1]// st:i+1)-g5(st:i)
+//
+//        if       g1 > 4  && g2>g1+1 && g3>g2+1 && ga >  sl && gb > sl  && gc < -sl  && gd < -sl  {
+//            return -1
+//        }else if g1 < -4 && g2<g1+1 && g3<g2+1 && ga < -sl && gb < -sl && gc >  sl  && gd >  sl{
+//            return 1
+//        }
+        //下のように変更すると小さな波も拾える
+//        if       g1 > 0  && g2>g1 && g3>g2 {
+//            return -1
+//        }
+        
+        if       g1 > 0  && g2>g1 && g3>g2 && ga >  sl && gb > sl  && gc < -sl  && gd < -sl  {
+            return -1
+        }else if g1 < 0 && g2<g1 && g3<g2 && ga < -sl && gb < -sl && gc >  sl  && gd >  sl{
+            return 1
+        }
+        return 0
+    }
+    
+    func setVHITWaves(number:Int) -> Int {//0:波なし 1:上向き波？ -1:その反対向きの波
+        let flatwidth:Int = 3//12frame-50ms
+        let t = upDownp(i: number + flatwidth)
+        if t != 0 {
+            if t==1{
+                append_vHITwaves(isRight:true,frameN:number,dispOn:true,currDispOn:false)
+            }else{
+                append_vHITwaves(isRight:false,frameN:number,dispOn:true,currDispOn:false)
+            }
+            let n=vHITwaves.count-1
+            for i in 0...30{//number..<number + 30{
+                vHITwaves[n].eye[i]=ltEyeVeloX[number+i]
+                vHITwaves[n].face[i]=faceVeloX[number+i]
+            }
+        }
+        return t
+    }
+    func getVHITWaves(){
+        if faceVeloX.count < 60 {// <1sec 16.7ms*60=1002ms
+            return
+        }
+        var skipCnt:Int = 0
+        for vcnt in 30..<(faceVeloX.count - 40) {//501ms 668ms
+            if skipCnt > 0{
+                skipCnt -= 1
+            }else if setVHITWaves(number:vcnt) != 0{
+                skipCnt = 30 //16.7ms*30=501ms 間はスキップ
+            }
+        }
+    }
+    @IBAction func tapGesture(_ sender: UITapGestureRecognizer) {
+        getVHITWaves()
+        for i in 0..<vHITwaves.count{
+            print(vHITwaves[i].frameN,vHITwaves[i].isRight)
+        }
+        print(vHITwaves.count)
+    }
+ 
+    func checksetPos(pos:Int,mode:Bool) -> Int{
+        let cnt=vHITwaves.count
         var return_n = -2
         if cnt>0{
             for i in 0..<cnt{
-                if waveTuple[i].1<pos && waveTuple[i].1+120>pos{
-                    waveTuple[i].3 = mode //sellected
+                if vHITwaves[i].frameN<pos && vHITwaves[i].frameN+30>pos{
+                    vHITwaves[i].currDispOn = mode //sellected
                     return_n = i
                     break
                 }
-                waveTuple[i].3 = 0//not sellected
+                vHITwaves[i].currDispOn = false//not sellected
             }
             if return_n > -1 && return_n < cnt{
                 for n in (return_n + 1)..<cnt{
-                    waveTuple[n].3 = 0
+                    vHITwaves[n].currDispOn = false
                 }
             }
         }else{
@@ -108,6 +164,7 @@ final class ViewController: UIViewController {
         }
         return return_n
     }
+  /*
     func drawvhitWaves(width w:CGFloat,height h:CGFloat) -> UIImage {
         let size = CGSize(width:w, height:h)
         var r:CGFloat=1//r:倍率magnification
@@ -381,7 +438,8 @@ final class ViewController: UIViewController {
         // 画面に表示する
         view.addSubview(vhitLineView!)
         //   showVog(f: true)
-    }
+    }*/
+    /*
     func drawRealwave(){//vHIT_eye_head
         if gyroLineView != nil{//これが無いとエラーがでる。
             gyroLineView?.removeFromSuperview()
@@ -403,7 +461,8 @@ final class ViewController: UIViewController {
         //      showBoxies(f: true)
         //        print("count----" + "\(view.subviews.count)")
     }
-    
+    */
+    /*
     func drawOnewave(startcount:Int){//vHIT_eye_head
         var startcnt = startcount
         if startcnt < 0 {
@@ -443,9 +502,7 @@ final class ViewController: UIViewController {
      drawVHITwaves()
      */
     
-    @IBAction func tapGesture(_ sender: UITapGestureRecognizer) {
-        init_vHITwaves(num: 100)
-    }
+   
     var arKitFlag:Bool=true
     @IBAction func onPauseARKitButton(_ sender: Any) {
         
@@ -687,7 +744,7 @@ final class ViewController: UIViewController {
             drawPath2.stroke()
             var text=dateString[endCnt-1]
             if arKitFlag==false{
-                text += "  face:" + Int(-faceVeloX[endCnt-1]*10000).description + " eye:" + Int(-ltEyeVeloX[endCnt-1]*10000).description
+                text += "  face:" + Int(-faceVeloX[endCnt-1]*100000).description + " eye:" + Int(-ltEyeVeloX[endCnt-1]*100000).description + " n:" + endCnt.description
             }
             text.draw(at:CGPoint(x:3,y:3),withAttributes: [
                 NSAttributedString.Key.foregroundColor : UIColor.black,
