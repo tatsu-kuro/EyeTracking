@@ -34,9 +34,417 @@ final class ViewController: UIViewController {
     var ltEyeX:CGFloat=0
     var rtEyeX:CGFloat=0
     private let session = ARSession()
+    //vhit
+    var eyeWs = [[Int]](repeating:[Int](repeating:0,count:125),count:80)
+    var gyroWs = [[Int]](repeating:[Int](repeating:0,count:125),count:80)
+    var waveTuple = Array<(Int,Int,Int,Int)>()//rl,framenum,disp onoff,current disp onoff)
+    var tempTuple = Array<(Int,Int,Int,Int)>()
+
+    struct wave {
+        var isRight : Bool
+        var dispOn : Bool
+        var currDispOn : Bool
+        var eye = [Int](repeating:0,count:125)
+        var face = [Int](repeating:0,count:125)
+    }
+    var vHITwaves = [wave]()
+    func init_vHITwaves(num:Int){
+        let tempInt=[Int](repeating: 0, count: 125)
+        let temp=wave(isRight: true, dispOn: true, currDispOn: true,eye:tempInt,face:tempInt)
+        for _ in 0...num{
+            vHITwaves.append(temp)
+        }
+        vHITwaves[0].eye[5]=1
+        vHITwaves[0].dispOn=false
+        vHITwaves[1].isRight=false
+        print(vHITwaves[0])
+        print(vHITwaves[1])
+    }
+//    struct Person {
+//        var isRt : Bool
+//        var dispOn : Bool
+//        var curDispOn :Bool
+//        var frameNum : Int
+//        let waves = [Int](repeating: Int, count: 125)
+//    }
+//    var persons : [Person] = []
+//    func temp(){
+//
+//        persons.append(Person(isRt:false,dispOn:false,curDispOn: false,frameNum: 23,waves:[repeating:12,count:125]) "Taro", age : 20))
+//    persons.append(Person(name: "Jiro", age : 17))
+//    persons.append(Person(name: "Saburo", age : 10))
+//    }
+    //    var lastVhitpoint:Int = -2//これはなんだろう→あとでチェック！！！
+//    func onWaveSliderValueChange1(){
+////vhit
+//        let vhitCurpoint = Int(waveSlider.value*(waveSlider.maximumValue-Float(view.bounds.width))/waveSlider.maximumValue)
+////        drawOnewave(startcount: vhitCurpoint)
+//        lastVhitpoint = vhitCurpoint
+//        if waveTuple.count>0{
+//            //setするだけか？
+//            checksetPos(pos: lastVhitpoint + Int(self.view.bounds.width/2), mode:1)
+////            drawVHITwaves()
+//        }
+//    }
+ /*   func checksetPos(pos:Int,mode:Int) -> Int{
+        let cnt=waveTuple.count
+        var return_n = -2
+        if cnt>0{
+            for i in 0..<cnt{
+                if waveTuple[i].1<pos && waveTuple[i].1+120>pos{
+                    waveTuple[i].3 = mode //sellected
+                    return_n = i
+                    break
+                }
+                waveTuple[i].3 = 0//not sellected
+            }
+            if return_n > -1 && return_n < cnt{
+                for n in (return_n + 1)..<cnt{
+                    waveTuple[n].3 = 0
+                }
+            }
+        }else{
+            return -1
+        }
+        return return_n
+    }
+    func drawvhitWaves(width w:CGFloat,height h:CGFloat) -> UIImage {
+        let size = CGSize(width:w, height:h)
+        var r:CGFloat=1//r:倍率magnification
+        if w==500*4{//mail
+           r=4
+        }
+        // イメージ処理の開始
+        UIGraphicsBeginImageContextWithOptions(size, false, 1.0)
+        // パスの初期化
+        let drawPath = UIBezierPath()
+        
+//        let str1 = calcDate.components(separatedBy: ":")
+        let str2 = "ID:"// + idString + "  " + str1[0] + ":" + str1[1]
+        let str3 = "vHIT96da"
+        str2.draw(at: CGPoint(x: 5*r, y: 180*r), withAttributes: [
+            NSAttributedString.Key.foregroundColor : UIColor.black,
+            NSAttributedString.Key.font : UIFont.monospacedDigitSystemFont(ofSize: 15*r, weight: UIFont.Weight.regular)])
+        str3.draw(at: CGPoint(x: 428*r, y: 180*r), withAttributes: [
+            NSAttributedString.Key.foregroundColor : UIColor.black,
+            NSAttributedString.Key.font : UIFont.monospacedDigitSystemFont(ofSize: 15*r, weight: UIFont.Weight.regular)])
+        
+        UIColor.black.setStroke()
+        var pList = Array<CGPoint>()
+        pList.append(CGPoint(x:0,y:0))
+        pList.append(CGPoint(x:0,y:180*r))
+        pList.append(CGPoint(x:240*r,y:180*r))
+        pList.append(CGPoint(x:240*r,y:0))
+        pList.append(CGPoint(x:260*r,y:0))
+        pList.append(CGPoint(x:260*r,y:180*r))
+        pList.append(CGPoint(x:500*r,y:180*r))
+        pList.append(CGPoint(x:500*r,y:0))
+        drawPath.lineWidth = 0.1*r
+        drawPath.move(to:pList[0])
+        drawPath.addLine(to:pList[1])
+        drawPath.addLine(to:pList[2])
+        drawPath.addLine(to:pList[3])
+        drawPath.addLine(to:pList[0])
+        drawPath.move(to:pList[4])
+        drawPath.addLine(to:pList[5])
+        drawPath.addLine(to:pList[6])
+        drawPath.addLine(to:pList[7])
+        drawPath.addLine(to:pList[4])
+        for i in 0...4 {
+            drawPath.move(to: CGPoint(x:30*r + CGFloat(i)*48*r,y:0))
+            drawPath.addLine(to: CGPoint(x:30*r + CGFloat(i)*48*r,y:180*r))
+            drawPath.move(to: CGPoint(x:290*r + CGFloat(i)*48*r,y:0))
+            drawPath.addLine(to: CGPoint(x:290*r + CGFloat(i)*48*r,y:180*r))
+        }
+        drawPath.stroke()
+        drawPath.removeAllPoints()
+        draw1wave(r: r)//just vHIT
+
+//
+//        blueGainStr.draw(at: CGPoint(x: 263*r, y: 167*r-167*r), withAttributes: [
+//            NSAttributedString.Key.foregroundColor : UIColor.black,
+//            NSAttributedString.Key.font : UIFont.monospacedDigitSystemFont(ofSize: 12*r, weight: UIFont.Weight.regular)])
+//        redGainStr.draw(at: CGPoint(x: 3*r, y: 167*r-167*r), withAttributes: [
+//            NSAttributedString.Key.foregroundColor : UIColor.black,
+//            NSAttributedString.Key.font : UIFont.monospacedDigitSystemFont(ofSize: 12*r, weight: UIFont.Weight.regular)])
+//
+//        // イメージコンテキストからUIImageを作る
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        // イメージ処理の終了
+        UIGraphicsEndImageContext()
+        return image!
+    }
+    func draw1wave(r:CGFloat){//just vHIT
+//        var redVORGainArray = Array<Double>()
+//        var blueVORGainArray = Array<Double>()
+
+        var pointList = Array<CGPoint>()
+        let drawPath = UIBezierPath()
+        var rlPt:CGFloat = 0
+        //r:4(mail)  r:1(screen)
+        var posY0=135*r
+        let vHITDisplayMode=0
+        if vHITDisplayMode==0{//up down
+            posY0=90*r
+        }
+       //15(+12)frame 62.5msでの値(eyeSpeed/headSpeed)を集める.EyeSeeCamに準じて
+        let gainPoint:Int=27
+        for i in 0..<waveTuple.count{
+            if waveTuple[i].2==0{//hidden vhit
+                continue
+            }
+            let tempGain=Double(-eyeWs[i][gainPoint])/Double(gyroWs[i][gainPoint])
+            if waveTuple[i].0==0{//
+                redVORGainArray.append(tempGain)
+            }else{
+                blueVORGainArray.append(tempGain)
+            }
+        }
+        let redGainAv=getAve(array: redVORGainArray)
+        let redGainSd=getSD(array:redVORGainArray,svvAv: redGainAv)
+        let blueGainAv=getAve(array: blueVORGainArray)
+        let blueGainSd=getSD(array:blueVORGainArray,svvAv: blueGainAv)
+        redGainStr = String(format: "(%d) Gain at 60ms     %.2f sd:%.2f",redVORGainArray.count,redGainAv,redGainSd)
+        blueGainStr = String(format:"(%d) Gain at 60ms     %.2f sd:%.2f",blueVORGainArray.count,blueGainAv,blueGainSd)
+*/
+        /*
+        for i in 0..<waveTuple.count{//blue vHIT
+            //if hide or leftside(red) return
+//            var waveTuple = Array<(Int,Int,Int,Int)>()//rl,framenum,disp onoff,current disp onoff)
+
+            if waveTuple[i].2 == 0 || waveTuple[i].0 == 0{//waveTuple[i].2==0/hide ==1/disp
+                continue
+            }
+            for n in 0..<120 {
+                let px = 260*r + CGFloat(n)*2*r//260 or 0
+                var py:CGFloat = 0
+                if vHITDisplayMode==1{
+                    py = -CGFloat(eyeWs[i][n])*r + posY0
+                }else{
+                    py = CGFloat(eyeWs[i][n])*r + posY0
+                }
+                let point = CGPoint(x:px,y:py)
+                pointList.append(point)
+            }
+            // 始点に移動する
+            drawPath.move(to: pointList[0])
+            // 配列から始点の値を取り除く
+            pointList.removeFirst()
+            // 配列から点を取り出して連結していく
+            for pt in pointList {
+                drawPath.addLine(to: pt)
+            }
+            // 線の色
+            UIColor.blue.setStroke()
+            // 線幅
+            drawPath.lineWidth = 0.3*r
+            pointList.removeAll()
+        }
+        drawPath.stroke()
+        drawPath.removeAllPoints()
+        var py:CGFloat=0
+        for i in 0..<waveTuple.count{//red vHIT
+            if waveTuple[i].2 == 0 || waveTuple[i].0 == 1{
+                continue
+            }
+            for n in 0..<120 {
+                let px = CGFloat(n*2)*r//260 or 0
+//                var py:CGFloat = 0
+                if vHITDisplayMode==1{//up down red
+                    py = CGFloat(eyeWs[i][n])*r + posY0//表示変更
+                }else{
+                    py = CGFloat(eyeWs[i][n])*r + posY0
+                }
+                let point = CGPoint(x:px,y:py)
+                pointList.append(point)
+            }
+            // 始点に移動する
+            drawPath.move(to: pointList[0])
+            // 配列から始点の値を取り除く
+            pointList.removeFirst()
+            // 配列から点を取り出して連結していく
+            for pt in pointList {
+                drawPath.addLine(to: pt)
+            }
+            // 線の色
+            UIColor.red.setStroke()
+            // 線幅
+            drawPath.lineWidth = 0.3*r
+            pointList.removeAll()
+        }
+        drawPath.stroke()
+        drawPath.removeAllPoints()
+        for i in 0..<waveTuple.count{//左右のgyroWsを表示
+            if waveTuple[i].2 == 0{//.2 hide
+                continue
+            }
+            if waveTuple[i].0 == 0{//gyro leftside
+                rlPt=0
+            }else{
+                rlPt=260
+            }
+            
+            for n in 0..<120 {
+                let px = rlPt*r + CGFloat(n*2)*r
+                if vHITDisplayMode==1{//up up
+//                    py = -CGFloat(gyroWs[i][n])*r + posY0//以下４行　表示変更
+                    if waveTuple[i].0 == 0{//left side gyro
+                        py = -CGFloat(gyroWs[i][n])*r + posY0
+                    }else{//right side gyro
+                        py = CGFloat(gyroWs[i][n])*r + posY0
+
+                    }
+                }else{//up down
+                    py = CGFloat(gyroWs[i][n])*r + posY0//以下４行　表示変更
+                }
+                let point = CGPoint(x:px,y:py)
+                pointList.append(point)
+            }
+            drawPath.move(to: pointList[0])
+            pointList.removeFirst()
+            for pt in pointList {
+                drawPath.addLine(to: pt)
+            }
+            UIColor.black.setStroke()
+            drawPath.lineWidth = 0.3*r
+            pointList.removeAll()
+        }
+        drawPath.stroke()
+        drawPath.removeAllPoints()
+        if r>3{//mailでは太線なし
+            return
+        }
+        for i in 0..<waveTuple.count{//太く表示する
+            if waveTuple[i].3 == 1 || (waveTuple[i].3 == 2 && waveTuple[i].2 == 1){
+                if waveTuple[i].0 == 0{//left side gyro
+                    rlPt=0
+                }else{
+                    rlPt=260
+                }
+                for n in 0..<120 {
+                    let px = rlPt*r + CGFloat( n*2)*r
+                    if vHITDisplayMode==1{//up up
+                        py = CGFloat(gyroWs[i][n])*r + posY0//以下４行　表示変更
+                        if waveTuple[i].0 == 0{
+                            py = -CGFloat(gyroWs[i][n])*r + posY0
+                        }
+                    }else{
+                        py = CGFloat(gyroWs[i][n])*r + posY0
+                    }
+                    let point = CGPoint(x:px,y:py)
+                    pointList.append(point)
+                }
+                drawPath.move(to: pointList[0])
+                pointList.removeFirst()
+                for pt in pointList {
+                    drawPath.addLine(to: pt)
+                }
+                UIColor.black.setStroke()
+                drawPath.lineWidth = 1.0*r
+                pointList.removeAll()
+                for n in 0..<120 {
+                    let px = rlPt*r + CGFloat(n*2)*r
+                    if vHITDisplayMode==1{//up up
+                        py = -CGFloat(eyeWs[i][n])*r + posY0//以下４行　表示変更
+                        if waveTuple[i].0 == 0{
+                            py = CGFloat(eyeWs[i][n])*r + posY0
+                        }
+                    }else{
+                        py = CGFloat(eyeWs[i][n])*r + posY0
+                    }
+                    let point = CGPoint(x:px,y:py)
+                    pointList.append(point)
+                }
+                drawPath.move(to: pointList[0])
+                pointList.removeFirst()
+                for pt in pointList {
+                    drawPath.addLine(to: pt)
+                }
+                UIColor.black.setStroke()
+                drawPath.lineWidth = 1.0*r
+                pointList.removeAll()
+            }
+        }
+        drawPath.stroke()
+        drawPath.removeAllPoints()
+    }
+    
+    func drawVHITwaves(){//解析結果のvHITwavesを表示する
+        if vhitLineView != nil{
+            vhitLineView?.removeFromSuperview()
+        }
+        //        let drawImage = drawWaves(width:view.bounds.width,height: view.bounds.width*2/5)
+        let drawImage = drawvhitWaves(width:500,height:200)
+        let dImage = drawImage.resize(size: CGSize(width:view.bounds.width, height:vhitBoxHeight))//view.bounds.width*2/5))
+        vhitLineView = UIImageView(image: dImage)
+        vhitLineView?.center =  CGPoint(x:view.bounds.width/2,y:vhitBoxYcenter)
+        // 画面に表示する
+        view.addSubview(vhitLineView!)
+        //   showVog(f: true)
+    }
+    func drawRealwave(){//vHIT_eye_head
+        if gyroLineView != nil{//これが無いとエラーがでる。
+            gyroLineView?.removeFromSuperview()
+            //            lineView?.isHidden = false
+        }
+        var startcnt:Int
+        if arrayDataCount < Int(self.view.bounds.width){//横幅以内なら０からそこまで表示
+            startcnt = 0
+        }else{//横幅超えたら、新しい横幅分を表示
+            startcnt = arrayDataCount - Int(self.view.bounds.width)
+        }
+        //波形を時間軸で表示
+        let drawImage = drawLine(num:startcnt,width:self.view.bounds.width,height:gyroBoxHeight)//180)
+        // イメージビューに設定する
+        gyroLineView = UIImageView(image: drawImage)
+        //       lineView?.center = self.view.center
+        gyroLineView?.center = CGPoint(x:view.bounds.width/2,y:gyroBoxYcenter)//340)//ここらあたりを変更se~7plusの大きさにも対応できた。
+        view.addSubview(gyroLineView!)
+        //      showBoxies(f: true)
+        //        print("count----" + "\(view.subviews.count)")
+    }
+    
+    func drawOnewave(startcount:Int){//vHIT_eye_head
+        var startcnt = startcount
+        if startcnt < 0 {
+            startcnt = 0
+        }
+        if gyroLineView != nil{//これが無いとエラーがでる。
+            gyroLineView?.removeFromSuperview()
+            //            lineView?.isHidden = false
+        }
+//        let posXCount=getPosXFilteredCount()
+        if arrayDataCount < Int(self.view.bounds.width){//横幅以内なら０からそこまで表示
+            startcnt = 0
+        }else if startcnt > arrayDataCount - Int(self.view.bounds.width){
+            startcnt = arrayDataCount - Int(self.view.bounds.width)
+        }
+        //波形を時間軸で表示
+        let drawImage = drawLine(num:startcnt,width:self.view.bounds.width,height:gyroBoxHeight)// 180)
+        // イメージビューに設定する
+        gyroLineView = UIImageView(image: drawImage)
+        //       lineView?.center = self.view.center
+        gyroLineView?.center = CGPoint(x:view.bounds.width/2,y:gyroBoxYcenter)// 340)
+        //ここらあたりを変更se~7plusの大きさにも対応できた。
+        view.addSubview(gyroLineView!)
+        //        print("count----" + "\(view.subviews.count)")
+    }*/
+    /*
+     //上に中央vHITwaveをタップで表示させるタップ範囲を設定
+     let temp = checksetPos(pos:lastVhitpoint + Int(loc.x),mode: 2)
+     if temp >= 0{
+         if waveTuple[temp].2 == 1{
+             waveTuple[temp].2 = 0//hide
+          }else{
+             waveTuple[temp].2 = 1//disp
+         }
+//                    print("waveTuple:",waveTuple[temp].2)
+     }
+     drawVHITwaves()
+     */
     
     @IBAction func tapGesture(_ sender: UITapGestureRecognizer) {
-        print("tapppppppp")
+        init_vHITwaves(num: 100)
     }
     var arKitFlag:Bool=true
     @IBAction func onPauseARKitButton(_ sender: Any) {
@@ -164,7 +572,7 @@ final class ViewController: UIViewController {
     }
 
     func setButtons(){
-        let top=CGFloat(UserDefaults.standard.float(forKey: "top"))
+//        let top=CGFloat(UserDefaults.standard.float(forKey: "top"))
         let bottom=CGFloat( UserDefaults.standard.float(forKey: "bottom"))
 
         let vw=view.bounds.width
@@ -320,7 +728,6 @@ final class ViewController: UIViewController {
                 startMultiFace=multiFace
                 startCnt=Int(waveSlider.value)
             }
-            
         } else if sender.state == .changed {
             if sender.location(in: view).y>view.bounds.height*2/5{
                 
