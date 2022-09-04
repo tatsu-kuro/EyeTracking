@@ -11,6 +11,109 @@ import Photos
 import MessageUI
 import ARKit
 import os
+extension UIImage {
+    func pixelData() -> [UInt8]? {
+        let size = self.size
+        let dataSize = size.width * size.height * 4
+        var pixelData = [UInt8](repeating: 0, count: Int(dataSize))
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        let context = CGContext(data: &pixelData,
+                                width: Int(size.width),
+                                height: Int(size.height),
+                                bitsPerComponent: 8,
+                                bytesPerRow: 4 * Int(size.width),
+                                space: colorSpace,
+                                bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue)
+        guard let cgImage = self.cgImage else { return nil }
+        context?.draw(cgImage, in: CGRect(x: 0, y: 0, width: size.width, height: size.height))
+        return pixelData
+    }
+    func resize(size _size: CGSize) -> UIImage? {
+        let widthRatio = _size.width / size.width
+        let heightRatio = _size.height / size.height
+        let ratio = widthRatio < heightRatio ? widthRatio : heightRatio
+        
+        let resizedSize = CGSize(width: size.width * ratio, height: size.height * ratio)
+        
+        UIGraphicsBeginImageContextWithOptions(resizedSize, false, 0.0) // 変更
+        draw(in: CGRect(origin: .zero, size: resizedSize))
+        let resizedImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return resizedImage
+    }
+
+    
+    func createGrayImage(r:[CGFloat], g: [CGFloat], b:[CGFloat], a:[CGFloat]) -> UIImage {
+        UIGraphicsBeginImageContextWithOptions(size, false, 0)
+        let wid:Int = Int(size.width)
+        let hei:Int = Int(size.height)
+        
+        for w in 0..<wid {
+            for h in 0..<hei {
+                let index = (w * wid) + h
+                let color = 0.2126 * r[index] + 0.7152 * g[index] + 0.0722 * b[index]
+                UIColor(red: color, green: color, blue: color, alpha: a[index]).setFill()
+                let drawRect = CGRect(x: w, y: h, width: 1, height: 1)
+                UIRectFill(drawRect)
+                draw(in: drawRect, blendMode: .destinationIn, alpha: 1)
+            }
+        }
+        let grayImage = UIGraphicsGetImageFromCurrentImageContext()!
+        UIGraphicsEndImageContext()
+        return grayImage
+    }
+    
+    func tint(color: [UIColor]) -> UIImage {
+        UIGraphicsBeginImageContextWithOptions(size, false, 0)
+        var colorCnt:Int = 0
+        let colorTotalCnt=color.count
+        for w in 0..<Int(size.width) {
+            for h in 0..<Int(size.height) {
+                let index = (w * Int(size.width)) + h
+                if colorCnt==colorTotalCnt{
+                    color[index-1].setFill()
+                    let drawRect = CGRect(x: w, y: h, width: 1, height: 1)
+                    UIRectFill(drawRect)
+                    draw(in: drawRect, blendMode: .destinationIn, alpha: 0)
+                    break
+                }else{
+                    color[index].setFill()
+                    let drawRect = CGRect(x: w, y: h, width: 1, height: 1)
+                    UIRectFill(drawRect)
+                    draw(in: drawRect, blendMode: .destinationIn, alpha: 1)
+                }
+                colorCnt += 1
+            }
+            if colorCnt==colorTotalCnt{
+                break
+            }
+        }
+        let tintedImage = UIGraphicsGetImageFromCurrentImageContext()!
+        UIGraphicsEndImageContext()
+        return tintedImage
+    }
+    func createImage(r:[CGFloat], g: [CGFloat], b:[CGFloat], a:[CGFloat]) -> UIImage {
+        UIGraphicsBeginImageContextWithOptions(size, false, 0)
+        let wid:Int = Int(size.width)
+        let hei:Int = Int(size.height)
+        
+        for w in 0..<wid {
+            for h in 0..<hei {
+                let index = (w * wid) + h
+                UIColor(red: r[index], green: g[index], blue: b[index], alpha: a[index]).setFill()
+                let drawRect = CGRect(x: w, y: h, width: 1, height: 1)
+                UIRectFill(drawRect)
+                draw(in: drawRect, blendMode: .destinationIn, alpha: 1)
+            }
+            print("createImage/h:",w)
+        }
+        let tintedImage = UIGraphicsGetImageFromCurrentImageContext()!
+        UIGraphicsEndImageContext()
+        return tintedImage
+    }
+}
+
+
 
 final class ViewController: UIViewController {
     let iroiro = myFunctions()
@@ -114,7 +217,7 @@ final class ViewController: UIViewController {
                 append_vHITwaves(isRight:false,frameN:number,dispOn:true,currDispOn:false)
             }
             let n=vHITwaves.count-1
-            for i in 0...30{//number..<number + 30{
+            for i in 0..<31{//number..<number + 30{
                 vHITwaves[n].eye[i]=ltEyeVeloX[number+i]
                 vHITwaves[n].face[i]=faceVeloX[number+i]
             }
@@ -138,8 +241,10 @@ final class ViewController: UIViewController {
         getVHITWaves()
         for i in 0..<vHITwaves.count{
             print(vHITwaves[i].frameN,vHITwaves[i].isRight)
+            print(vHITwaves[i].face)
         }
-        print(vHITwaves.count)
+//        print(vHITwaves.count)
+//        drawVHITwaves()
     }
  
     func checksetPos(pos:Int,mode:Bool) -> Int{
@@ -164,7 +269,7 @@ final class ViewController: UIViewController {
         }
         return return_n
     }
-  /*
+  
     func drawvhitWaves(width w:CGFloat,height h:CGFloat) -> UIImage {
         let size = CGSize(width:w, height:h)
         var r:CGFloat=1//r:倍率magnification
@@ -215,230 +320,156 @@ final class ViewController: UIViewController {
         }
         drawPath.stroke()
         drawPath.removeAllPoints()
-        draw1wave(r: r)//just vHIT
-
-//
-//        blueGainStr.draw(at: CGPoint(x: 263*r, y: 167*r-167*r), withAttributes: [
-//            NSAttributedString.Key.foregroundColor : UIColor.black,
-//            NSAttributedString.Key.font : UIFont.monospacedDigitSystemFont(ofSize: 12*r, weight: UIFont.Weight.regular)])
-//        redGainStr.draw(at: CGPoint(x: 3*r, y: 167*r-167*r), withAttributes: [
-//            NSAttributedString.Key.foregroundColor : UIColor.black,
-//            NSAttributedString.Key.font : UIFont.monospacedDigitSystemFont(ofSize: 12*r, weight: UIFont.Weight.regular)])
-//
-//        // イメージコンテキストからUIImageを作る
-        let image = UIGraphicsGetImageFromCurrentImageContext()
-        // イメージ処理の終了
-        UIGraphicsEndImageContext()
-        return image!
-    }
-    func draw1wave(r:CGFloat){//just vHIT
-//        var redVORGainArray = Array<Double>()
-//        var blueVORGainArray = Array<Double>()
-
-        var pointList = Array<CGPoint>()
-        let drawPath = UIBezierPath()
-        var rlPt:CGFloat = 0
+//        draw1wave(r: r)//just vHIT
+        
+        var pointListEye = Array<CGPoint>()
+        var pointListFace = Array<CGPoint>()
+        let dx0=CGFloat(245.0/30.0)
+//        var rlPt:CGFloat = 0
         //r:4(mail)  r:1(screen)
         var posY0=135*r
         let vHITDisplayMode=0
         if vHITDisplayMode==0{//up down
             posY0=90*r
         }
-       //15(+12)frame 62.5msでの値(eyeSpeed/headSpeed)を集める.EyeSeeCamに準じて
-        let gainPoint:Int=27
-        for i in 0..<waveTuple.count{
-            if waveTuple[i].2==0{//hidden vhit
-                continue
+        
+        let drawPathEye = UIBezierPath()
+        let drawPathFace = UIBezierPath()
+        for i in 0..<vHITwaves.count{
+//            if vHITwaves[i].dispOn == false{//}
+//                continue
+//            }
+            let dx = vHITwaves[i].isRight == true ? 0 : 260*r
+            for n in 0..<29{
+                let px = dx + CGFloat(n)*dx0*r
+                let py1 = -vHITwaves[i].eye[n]*r*1000 + posY0
+                let py2 = -vHITwaves[i].face[n]*r*1000 + posY0
+                let point1 = CGPoint(x:px,y:py1)
+                let point2 = CGPoint(x:px,y:py2)
+                pointListEye.append(point1)
+                pointListFace.append(point2)
             }
-            let tempGain=Double(-eyeWs[i][gainPoint])/Double(gyroWs[i][gainPoint])
-            if waveTuple[i].0==0{//
-                redVORGainArray.append(tempGain)
-            }else{
-                blueVORGainArray.append(tempGain)
-            }
-        }
-        let redGainAv=getAve(array: redVORGainArray)
-        let redGainSd=getSD(array:redVORGainArray,svvAv: redGainAv)
-        let blueGainAv=getAve(array: blueVORGainArray)
-        let blueGainSd=getSD(array:blueVORGainArray,svvAv: blueGainAv)
-        redGainStr = String(format: "(%d) Gain at 60ms     %.2f sd:%.2f",redVORGainArray.count,redGainAv,redGainSd)
-        blueGainStr = String(format:"(%d) Gain at 60ms     %.2f sd:%.2f",blueVORGainArray.count,blueGainAv,blueGainSd)
-*/
-        /*
-        for i in 0..<waveTuple.count{//blue vHIT
-            //if hide or leftside(red) return
-//            var waveTuple = Array<(Int,Int,Int,Int)>()//rl,framenum,disp onoff,current disp onoff)
-
-            if waveTuple[i].2 == 0 || waveTuple[i].0 == 0{//waveTuple[i].2==0/hide ==1/disp
-                continue
-            }
-            for n in 0..<120 {
-                let px = 260*r + CGFloat(n)*2*r//260 or 0
-                var py:CGFloat = 0
-                if vHITDisplayMode==1{
-                    py = -CGFloat(eyeWs[i][n])*r + posY0
-                }else{
-                    py = CGFloat(eyeWs[i][n])*r + posY0
-                }
-                let point = CGPoint(x:px,y:py)
-                pointList.append(point)
-            }
-            // 始点に移動する
-            drawPath.move(to: pointList[0])
+            // イメージ処理の開始
+            // パスの初期化
+               // 始点に移動する
+            drawPathEye.move(to: pointListEye[0])
             // 配列から始点の値を取り除く
-            pointList.removeFirst()
+            pointListEye.removeFirst()
             // 配列から点を取り出して連結していく
-            for pt in pointList {
-                drawPath.addLine(to: pt)
+            for pt in pointListEye {
+                drawPathEye.addLine(to: pt)
             }
-            // 線の色
-            UIColor.blue.setStroke()
-            // 線幅
-            drawPath.lineWidth = 0.3*r
-            pointList.removeAll()
-        }
-        drawPath.stroke()
-        drawPath.removeAllPoints()
-        var py:CGFloat=0
-        for i in 0..<waveTuple.count{//red vHIT
-            if waveTuple[i].2 == 0 || waveTuple[i].0 == 1{
-                continue
-            }
-            for n in 0..<120 {
-                let px = CGFloat(n*2)*r//260 or 0
-//                var py:CGFloat = 0
-                if vHITDisplayMode==1{//up down red
-                    py = CGFloat(eyeWs[i][n])*r + posY0//表示変更
-                }else{
-                    py = CGFloat(eyeWs[i][n])*r + posY0
-                }
-                let point = CGPoint(x:px,y:py)
-                pointList.append(point)
-            }
-            // 始点に移動する
-            drawPath.move(to: pointList[0])
+            drawPathFace.move(to: pointListFace[0])
             // 配列から始点の値を取り除く
-            pointList.removeFirst()
+            pointListFace.removeFirst()
             // 配列から点を取り出して連結していく
-            for pt in pointList {
-                drawPath.addLine(to: pt)
+            for pt in pointListFace {
+                drawPathFace.addLine(to: pt)
             }
-            // 線の色
-            UIColor.red.setStroke()
-            // 線幅
-            drawPath.lineWidth = 0.3*r
-            pointList.removeAll()
-        }
-        drawPath.stroke()
-        drawPath.removeAllPoints()
-        for i in 0..<waveTuple.count{//左右のgyroWsを表示
-            if waveTuple[i].2 == 0{//.2 hide
-                continue
-            }
-            if waveTuple[i].0 == 0{//gyro leftside
-                rlPt=0
+              // 線の色
+            if vHITwaves[i].isRight==true{
+                UIColor.red.setStroke()
             }else{
-                rlPt=260
+                UIColor.blue.setStroke()
             }
-            
-            for n in 0..<120 {
-                let px = rlPt*r + CGFloat(n*2)*r
-                if vHITDisplayMode==1{//up up
-//                    py = -CGFloat(gyroWs[i][n])*r + posY0//以下４行　表示変更
-                    if waveTuple[i].0 == 0{//left side gyro
-                        py = -CGFloat(gyroWs[i][n])*r + posY0
-                    }else{//right side gyro
-                        py = CGFloat(gyroWs[i][n])*r + posY0
-
-                    }
-                }else{//up down
-                    py = CGFloat(gyroWs[i][n])*r + posY0//以下４行　表示変更
-                }
-                let point = CGPoint(x:px,y:py)
-                pointList.append(point)
-            }
-            drawPath.move(to: pointList[0])
-            pointList.removeFirst()
-            for pt in pointList {
-                drawPath.addLine(to: pt)
-            }
+            // 線幅
+            drawPathEye.lineWidth = 0.3
+            drawPathFace.lineWidth = 0.3
+            drawPathEye.stroke()
+            drawPathEye.removeAllPoints()
             UIColor.black.setStroke()
-            drawPath.lineWidth = 0.3*r
-            pointList.removeAll()
+            drawPathFace.stroke()
+            drawPathFace.removeAllPoints()
         }
-        drawPath.stroke()
-        drawPath.removeAllPoints()
-        if r>3{//mailでは太線なし
-            return
-        }
-        for i in 0..<waveTuple.count{//太く表示する
-            if waveTuple[i].3 == 1 || (waveTuple[i].3 == 2 && waveTuple[i].2 == 1){
-                if waveTuple[i].0 == 0{//left side gyro
-                    rlPt=0
-                }else{
-                    rlPt=260
-                }
-                for n in 0..<120 {
-                    let px = rlPt*r + CGFloat( n*2)*r
-                    if vHITDisplayMode==1{//up up
-                        py = CGFloat(gyroWs[i][n])*r + posY0//以下４行　表示変更
-                        if waveTuple[i].0 == 0{
-                            py = -CGFloat(gyroWs[i][n])*r + posY0
-                        }
-                    }else{
-                        py = CGFloat(gyroWs[i][n])*r + posY0
-                    }
-                    let point = CGPoint(x:px,y:py)
-                    pointList.append(point)
-                }
-                drawPath.move(to: pointList[0])
-                pointList.removeFirst()
-                for pt in pointList {
-                    drawPath.addLine(to: pt)
-                }
-                UIColor.black.setStroke()
-                drawPath.lineWidth = 1.0*r
-                pointList.removeAll()
-                for n in 0..<120 {
-                    let px = rlPt*r + CGFloat(n*2)*r
-                    if vHITDisplayMode==1{//up up
-                        py = -CGFloat(eyeWs[i][n])*r + posY0//以下４行　表示変更
-                        if waveTuple[i].0 == 0{
-                            py = CGFloat(eyeWs[i][n])*r + posY0
-                        }
-                    }else{
-                        py = CGFloat(eyeWs[i][n])*r + posY0
-                    }
-                    let point = CGPoint(x:px,y:py)
-                    pointList.append(point)
-                }
-                drawPath.move(to: pointList[0])
-                pointList.removeFirst()
-                for pt in pointList {
-                    drawPath.addLine(to: pt)
-                }
-                UIColor.black.setStroke()
-                drawPath.lineWidth = 1.0*r
-                pointList.removeAll()
+        
+        
+        
+        
+        
+        
+        
+//        // イメージコンテキストからUIImageを作る
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        // イメージ処理の終了
+        UIGraphicsEndImageContext()
+        return image!
+    }
+   
+    func draw1wave(r:CGFloat){//just vHIT
+        var pointListEye = Array<CGPoint>()
+        var pointListFace = Array<CGPoint>()
+        let dx0=CGFloat(245.0/30.0)
+//        var rlPt:CGFloat = 0
+        //r:4(mail)  r:1(screen)
+        var posY0=135*r
+//        let vHITDisplayMode=0
+//        if vHITDisplayMode==0{//up down
+//            posY0=90*r
+//        }
+        
+        for i in 0..<vHITwaves.count{
+            if vHITwaves[i].dispOn == false{//} || vHITwaves[i].isRight == true{
+                continue
             }
+            let dx = vHITwaves[i].isRight == true ? 0 : 260*r
+            for n in 0..<30{
+                let px = dx + CGFloat(n)*dx0*r
+                let py1 = -vHITwaves[i].eye[n]*r*1000 + posY0
+                let py2 = -vHITwaves[i].face[n]*r*1000 + posY0
+                let point1 = CGPoint(x:px,y:py1)
+                let point2 = CGPoint(x:px,y:py2)
+                pointListEye.append(point1)
+                pointListFace.append(point2)
+            }
+            // イメージ処理の開始
+            // パスの初期化
+            let drawPath1 = UIBezierPath()
+            let drawPath2 = UIBezierPath()
+            // 始点に移動する
+            drawPath1.move(to: pointListEye[0])
+            // 配列から始点の値を取り除く
+            pointListEye.removeFirst()
+            // 配列から点を取り出して連結していく
+            for pt in pointListEye {
+                drawPath1.addLine(to: pt)
+            }
+            drawPath2.move(to: pointListFace[0])
+            // 配列から始点の値を取り除く
+            pointListFace.removeFirst()
+            // 配列から点を取り出して連結していく
+            for pt in pointListFace {
+                drawPath2.addLine(to: pt)
+            }
+            // 線の色
+            UIColor.black.setStroke()
+            // 線幅
+            drawPath1.lineWidth = 0.3
+            drawPath2.lineWidth = 0.3
+            // 線の色
+            if vHITwaves[i].isRight==true{
+                UIColor.red.setStroke()
+            }else{
+                UIColor.blue.setStroke()
+            }
+            drawPath1.stroke()
+            UIColor.black.setStroke()
+            drawPath2.stroke()
         }
-        drawPath.stroke()
-        drawPath.removeAllPoints()
     }
     
     func drawVHITwaves(){//解析結果のvHITwavesを表示する
-        if vhitLineView != nil{
-            vhitLineView?.removeFromSuperview()
-        }
+//        if vhitLineView != nil{
+//            vhitLineView?.removeFromSuperview()
+//        }
         //        let drawImage = drawWaves(width:view.bounds.width,height: view.bounds.width*2/5)
         let drawImage = drawvhitWaves(width:500,height:200)
-        let dImage = drawImage.resize(size: CGSize(width:view.bounds.width, height:vhitBoxHeight))//view.bounds.width*2/5))
-        vhitLineView = UIImageView(image: dImage)
-        vhitLineView?.center =  CGPoint(x:view.bounds.width/2,y:vhitBoxYcenter)
+        let dImage = drawImage.resize(size: CGSize(width:view.bounds.width, height:view.bounds.width*2/5))//view.bounds.width*2/5))
+        vhitBoxView = UIImageView(image: dImage)
+//        vhitLineView?.center =  CGPoint(x:view.bounds.width/2,y:vhitBoxYcenter)
         // 画面に表示する
-        view.addSubview(vhitLineView!)
+        view.addSubview(vhitBoxView!)
         //   showVog(f: true)
-    }*/
+    }
     /*
     func drawRealwave(){//vHIT_eye_head
         if gyroLineView != nil{//これが無いとエラーがでる。
@@ -565,7 +596,7 @@ final class ViewController: UIViewController {
         multiFace = iroiro.getUserDefaultCGFloat(str: "multiFace", ret: 100)
  
         displayLink = CADisplayLink(target: self, selector: #selector(self.displayLinkUpdate))
-        displayLink!.preferredFramesPerSecond = 60//120
+        displayLink!.preferredFramesPerSecond = 120
 //        view.addSubview(lookAtPointView)
         session.delegate = self
         displayLink?.add(to: RunLoop.main, forMode: .common)
@@ -573,6 +604,7 @@ final class ViewController: UIViewController {
 //        waveSlider.minimumTrackTintColor=UIColor.blue
         waveSlider.minimumTrackTintColor=UIColor.systemGray5
         waveSlider.maximumTrackTintColor=UIColor.systemGray5
+//        setButtons()
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -710,12 +742,9 @@ final class ViewController: UIViewController {
                 pointList1.append(point1)
                 pointList2.append(point2)
             }
-            
-            //        print("count:",startCnt,endCnt,pointList1.count)
             // イメージ処理の開始
             // パスの初期化
             let drawPath1 = UIBezierPath()
-            let drawPath2 = UIBezierPath()
             // 始点に移動する
             drawPath1.move(to: pointList1[0])
             // 配列から始点の値を取り除く
@@ -724,6 +753,14 @@ final class ViewController: UIViewController {
             for pt in pointList1 {
                 drawPath1.addLine(to: pt)
             }
+            // 線幅
+            drawPath1.lineWidth = 0.3
+            // 線の色
+            UIColor.black.setStroke()
+            // 線を描く
+            drawPath1.stroke()
+            
+            let drawPath2 = UIBezierPath()
             drawPath2.move(to: pointList2[0])
             // 配列から始点の値を取り除く
             pointList2.removeFirst()
@@ -731,16 +768,8 @@ final class ViewController: UIViewController {
             for pt in pointList2 {
                 drawPath2.addLine(to: pt)
             }
-            // 線の色
-            UIColor.black.setStroke()
-            // 線幅
-            drawPath1.lineWidth = 0.3
             drawPath2.lineWidth = 0.3
-            // 線を描く
             UIColor.red.setStroke()
-            drawPath1.stroke()
-            
-            UIColor.black.setStroke()
             drawPath2.stroke()
             var text=dateString[endCnt-1]
             if arKitFlag==false{
@@ -860,6 +889,7 @@ extension ViewController: ARSessionDelegate {
         let lag=CFAbsoluteTimeGetCurrent()-lastTime
 //        print(lag)
         lastTime=CFAbsoluteTimeGetCurrent()
+        //60hz前後の様だが、少し遅れると同じものを２回拾いそう、どうするか？
 
         //        let logger = Logger()
         //face, rightEye, leftEyeのx,y軸方向の回転角を出力
