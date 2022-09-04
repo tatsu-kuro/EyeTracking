@@ -109,9 +109,9 @@ final class ViewController: UIViewController {
 //        }
         
         if       g1 > 0  && g2>g1 && g3>g2 && ga >  sl && gb > sl  && gc < -sl  && gd < -sl  {
-            return -1
-        }else if g1 < 0 && g2<g1 && g3<g2 && ga < -sl && gb < -sl && gc >  sl  && gd >  sl{
             return 1
+        }else if g1 < 0 && g2<g1 && g3<g2 && ga < -sl && gb < -sl && gc >  sl  && gd >  sl{
+            return -1
         }
         return 0
     }
@@ -263,8 +263,8 @@ final class ViewController: UIViewController {
             }
             for n in 0..<30{
                 let px = dx + CGFloat(n)*dx0*r
-                let py1 = -vHITwaves[i].eye[n]*r*1000 + posY0
-                let py2 = -vHITwaves[i].face[n]*r*1000 + posY0
+                let py1 = vHITwaves[i].eye[n]*r*1000 + posY0
+                let py2 = vHITwaves[i].face[n]*r*1000 + posY0
                 let point1 = CGPoint(x:px,y:py1)
                 let point2 = CGPoint(x:px,y:py2)
                 pointListEye.append(point1)
@@ -336,7 +336,6 @@ final class ViewController: UIViewController {
    
     var arKitFlag:Bool=true
     @IBAction func onPauseARKitButton(_ sender: Any) {
-        
         getVHITWaves()
         if arKitFlag==true && dateString.count>60{
             arKitFlag=false
@@ -344,14 +343,8 @@ final class ViewController: UIViewController {
             waveSlider.isEnabled=true
             waveSlider.minimumTrackTintColor=UIColor.blue
             getVHITWaves()
-
-            
-     
-    
+//            view.layer.sublayers?.removeLast()
             drawVHITBox()
-            
-            
-            
         }else{
             arKitFlag=true
             waveSlider.isEnabled=false
@@ -366,22 +359,22 @@ final class ViewController: UIViewController {
         return .portrait
     }
 
-    func drawCircle(cPoint:CGPoint,_ diameter:CGFloat,_ color:CGColor){
-        /* --- 円を描画 --- */
-        let circleLayer = CAShapeLayer.init()
-        let circleFrame = CGRect.init(x:cPoint.x-diameter/2,y:cPoint.y-diameter/2,width:diameter,height:diameter)
-        circleLayer.frame = circleFrame
-        // 輪郭の色
-        circleLayer.strokeColor = UIColor.white.cgColor
-        // 円の中の色
-        circleLayer.fillColor = color
-        // 輪郭の太さ
-        circleLayer.lineWidth = 0.5
-        // 円形を描画
-        circleLayer.path = UIBezierPath.init(ovalIn: CGRect.init(x: 0, y: 0, width: circleFrame.size.width, height: circleFrame.size.height)).cgPath
-        self.view.layer.addSublayer(circleLayer)
-        print("sublayer2:",view.layer.sublayers?.count)
-    }
+//    func drawCircle(cPoint:CGPoint,_ diameter:CGFloat,_ color:CGColor){
+//        /* --- 円を描画 --- */
+//        let circleLayer = CAShapeLayer.init()
+//        let circleFrame = CGRect.init(x:cPoint.x-diameter/2,y:cPoint.y-diameter/2,width:diameter,height:diameter)
+//        circleLayer.frame = circleFrame
+//        // 輪郭の色
+//        circleLayer.strokeColor = UIColor.white.cgColor
+//        // 円の中の色
+//        circleLayer.fillColor = color
+//        // 輪郭の太さ
+//        circleLayer.lineWidth = 0.5
+//        // 円形を描画
+//        circleLayer.path = UIBezierPath.init(ovalIn: CGRect.init(x: 0, y: 0, width: circleFrame.size.width, height: circleFrame.size.height)).cgPath
+//        self.view.layer.addSublayer(circleLayer)
+//        print("sublayer2:",view.layer.sublayers?.count)
+//    }
  
 
     override func viewDidLoad() {
@@ -422,8 +415,6 @@ final class ViewController: UIViewController {
             initFlag=false
         }else{
             view.layer.sublayers?.removeLast()
-            view.layer.sublayers?.removeLast()
-            view.layer.sublayers?.removeLast()
         }
         let y0:CGFloat=view.bounds.height/4-50
         let dy:CGFloat=50
@@ -437,17 +428,17 @@ final class ViewController: UIViewController {
             dateString.append(df.string(from: date))
             faceVeloX.append(faceVeloX0)
             ltEyeVeloX.append(ltEyeVeloX0)
-            drawCircle(cPoint:CGPoint(x:view.bounds.width/2+faceVeloX0*multiFace,y:y0),30,UIColor.red.cgColor)
-            drawCircle(cPoint:CGPoint(x:view.bounds.width/2+ltEyeVeloX0*multiEye,y:y0+dy),30,UIColor.red.cgColor)
-//            progressFaceView.setProgress(0.5 + Float(faceVeloX0)*10, animated: true)
-//            progressEyeView.setProgress(0.5 + Float(ltEyeVeloX0)*10, animated: true)
+//            drawCircle(cPoint:CGPoint(x:view.bounds.width/2+faceVeloX0*multiFace,y:y0),30,UIColor.red.cgColor)
+//            drawCircle(cPoint:CGPoint(x:view.bounds.width/2+ltEyeVeloX0*multiEye,y:y0+dy),30,UIColor.red.cgColor)
+            progressFaceView.setProgress(0.5 + Float(faceVeloX0)*10, animated: true)
+            progressEyeView.setProgress(0.5 + Float(ltEyeVeloX0)*10, animated: true)
         }else{//検出できていない時はappendしない
 //            faceVelocityX.append(faceVeloX)
 //            eyeVelocityX.append(ltEyeVeloX)
-            drawCircle(cPoint:CGPoint(x:view.bounds.width/2+faceVeloX0,y:y0),30,UIColor.brown.cgColor)
-            drawCircle(cPoint:CGPoint(x:view.bounds.width/2+ltEyeVeloX0,y:y0+dy),30,UIColor.brown.cgColor)
-//            progressFaceView.setProgress(0, animated: true)
-//            progressEyeView.setProgress(0, animated: true)
+//            drawCircle(cPoint:CGPoint(x:view.bounds.width/2+faceVeloX0,y:y0),30,UIColor.brown.cgColor)
+//            drawCircle(cPoint:CGPoint(x:view.bounds.width/2+ltEyeVeloX0,y:y0+dy),30,UIColor.brown.cgColor)
+            progressFaceView.setProgress(0, animated: true)
+            progressEyeView.setProgress(0, animated: true)
 
         }
         if faceVeloX.count>60*60*2{//2min
@@ -488,8 +479,8 @@ final class ViewController: UIViewController {
         vhitBoxView?.frame=CGRect(x:0,y:sliderY-vw*180/320-sp*2-vw*2/5-sp*2,width :vw,height:vw*2/5)
         progressFaceView.frame=CGRect(x:20,y:top+20,width: vw-40,height: 20)
         progressEyeView.frame=CGRect(x:20,y:top+50,width: vw-40,height: 20)
-        progressEyeView.isHidden=true
-        progressFaceView.isHidden=true
+//        progressEyeView.isHidden=true
+//        progressFaceView.isHidden=true
     }
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
@@ -508,10 +499,14 @@ final class ViewController: UIViewController {
         //        }
         setButtons()
     }
-
+    var initOnWaveSlideF:Bool=true
     @objc func onWaveSliderValueChange(){
         let endCnt=Int(waveSlider.value)
-        view.layer.sublayers?.removeLast()
+        if initOnWaveSlideF==true{
+            initOnWaveSlideF=false
+        }else{
+            view.layer.sublayers?.removeLast()
+        }
         let startCnt = endCnt-60//点の数
         //波形を時間軸で表示
         let drawImage = drawWave(startCnt:startCnt,endCnt:endCnt)
@@ -520,8 +515,6 @@ final class ViewController: UIViewController {
         view.addSubview(waveBoxView!)
     }
     func drawVHITBox(){//解析結果のvHITwavesを表示する
-//        view.layer.sublayers?.removeLast()
-//        onWaveSliderValueChange()
         let drawImage = drawVHIT(width:500,height:200)
         let dImage = drawImage.resize(size: CGSize(width:view.bounds.width, height:view.bounds.width*2/5))
         vhitBoxView = UIImageView(image: dImage)
