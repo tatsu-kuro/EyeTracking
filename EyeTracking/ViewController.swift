@@ -12,22 +12,22 @@ import MessageUI
 import ARKit
 import os
 extension UIImage {
-    func pixelData() -> [UInt8]? {
-        let size = self.size
-        let dataSize = size.width * size.height * 4
-        var pixelData = [UInt8](repeating: 0, count: Int(dataSize))
-        let colorSpace = CGColorSpaceCreateDeviceRGB()
-        let context = CGContext(data: &pixelData,
-                                width: Int(size.width),
-                                height: Int(size.height),
-                                bitsPerComponent: 8,
-                                bytesPerRow: 4 * Int(size.width),
-                                space: colorSpace,
-                                bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue)
-        guard let cgImage = self.cgImage else { return nil }
-        context?.draw(cgImage, in: CGRect(x: 0, y: 0, width: size.width, height: size.height))
-        return pixelData
-    }
+//    func pixelData() -> [UInt8]? {
+//        let size = self.size
+//        let dataSize = size.width * size.height * 4
+//        var pixelData = [UInt8](repeating: 0, count: Int(dataSize))
+//        let colorSpace = CGColorSpaceCreateDeviceRGB()
+//        let context = CGContext(data: &pixelData,
+//                                width: Int(size.width),
+//                                height: Int(size.height),
+//                                bitsPerComponent: 8,
+//                                bytesPerRow: 4 * Int(size.width),
+//                                space: colorSpace,
+//                                bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue)
+//        guard let cgImage = self.cgImage else { return nil }
+//        context?.draw(cgImage, in: CGRect(x: 0, y: 0, width: size.width, height: size.height))
+//        return pixelData
+//    }
     func resize(size _size: CGSize) -> UIImage? {
         let widthRatio = _size.width / size.width
         let heightRatio = _size.height / size.height
@@ -43,74 +43,74 @@ extension UIImage {
     }
 
     
-    func createGrayImage(r:[CGFloat], g: [CGFloat], b:[CGFloat], a:[CGFloat]) -> UIImage {
-        UIGraphicsBeginImageContextWithOptions(size, false, 0)
-        let wid:Int = Int(size.width)
-        let hei:Int = Int(size.height)
-        
-        for w in 0..<wid {
-            for h in 0..<hei {
-                let index = (w * wid) + h
-                let color = 0.2126 * r[index] + 0.7152 * g[index] + 0.0722 * b[index]
-                UIColor(red: color, green: color, blue: color, alpha: a[index]).setFill()
-                let drawRect = CGRect(x: w, y: h, width: 1, height: 1)
-                UIRectFill(drawRect)
-                draw(in: drawRect, blendMode: .destinationIn, alpha: 1)
-            }
-        }
-        let grayImage = UIGraphicsGetImageFromCurrentImageContext()!
-        UIGraphicsEndImageContext()
-        return grayImage
-    }
-    
-    func tint(color: [UIColor]) -> UIImage {
-        UIGraphicsBeginImageContextWithOptions(size, false, 0)
-        var colorCnt:Int = 0
-        let colorTotalCnt=color.count
-        for w in 0..<Int(size.width) {
-            for h in 0..<Int(size.height) {
-                let index = (w * Int(size.width)) + h
-                if colorCnt==colorTotalCnt{
-                    color[index-1].setFill()
-                    let drawRect = CGRect(x: w, y: h, width: 1, height: 1)
-                    UIRectFill(drawRect)
-                    draw(in: drawRect, blendMode: .destinationIn, alpha: 0)
-                    break
-                }else{
-                    color[index].setFill()
-                    let drawRect = CGRect(x: w, y: h, width: 1, height: 1)
-                    UIRectFill(drawRect)
-                    draw(in: drawRect, blendMode: .destinationIn, alpha: 1)
-                }
-                colorCnt += 1
-            }
-            if colorCnt==colorTotalCnt{
-                break
-            }
-        }
-        let tintedImage = UIGraphicsGetImageFromCurrentImageContext()!
-        UIGraphicsEndImageContext()
-        return tintedImage
-    }
-    func createImage(r:[CGFloat], g: [CGFloat], b:[CGFloat], a:[CGFloat]) -> UIImage {
-        UIGraphicsBeginImageContextWithOptions(size, false, 0)
-        let wid:Int = Int(size.width)
-        let hei:Int = Int(size.height)
-        
-        for w in 0..<wid {
-            for h in 0..<hei {
-                let index = (w * wid) + h
-                UIColor(red: r[index], green: g[index], blue: b[index], alpha: a[index]).setFill()
-                let drawRect = CGRect(x: w, y: h, width: 1, height: 1)
-                UIRectFill(drawRect)
-                draw(in: drawRect, blendMode: .destinationIn, alpha: 1)
-            }
-            print("createImage/h:",w)
-        }
-        let tintedImage = UIGraphicsGetImageFromCurrentImageContext()!
-        UIGraphicsEndImageContext()
-        return tintedImage
-    }
+//    func createGrayImage(r:[CGFloat], g: [CGFloat], b:[CGFloat], a:[CGFloat]) -> UIImage {
+//        UIGraphicsBeginImageContextWithOptions(size, false, 0)
+//        let wid:Int = Int(size.width)
+//        let hei:Int = Int(size.height)
+//
+//        for w in 0..<wid {
+//            for h in 0..<hei {
+//                let index = (w * wid) + h
+//                let color = 0.2126 * r[index] + 0.7152 * g[index] + 0.0722 * b[index]
+//                UIColor(red: color, green: color, blue: color, alpha: a[index]).setFill()
+//                let drawRect = CGRect(x: w, y: h, width: 1, height: 1)
+//                UIRectFill(drawRect)
+//                draw(in: drawRect, blendMode: .destinationIn, alpha: 1)
+//            }
+//        }
+//        let grayImage = UIGraphicsGetImageFromCurrentImageContext()!
+//        UIGraphicsEndImageContext()
+//        return grayImage
+//    }
+//
+//    func tint(color: [UIColor]) -> UIImage {
+//        UIGraphicsBeginImageContextWithOptions(size, false, 0)
+//        var colorCnt:Int = 0
+//        let colorTotalCnt=color.count
+//        for w in 0..<Int(size.width) {
+//            for h in 0..<Int(size.height) {
+//                let index = (w * Int(size.width)) + h
+//                if colorCnt==colorTotalCnt{
+//                    color[index-1].setFill()
+//                    let drawRect = CGRect(x: w, y: h, width: 1, height: 1)
+//                    UIRectFill(drawRect)
+//                    draw(in: drawRect, blendMode: .destinationIn, alpha: 0)
+//                    break
+//                }else{
+//                    color[index].setFill()
+//                    let drawRect = CGRect(x: w, y: h, width: 1, height: 1)
+//                    UIRectFill(drawRect)
+//                    draw(in: drawRect, blendMode: .destinationIn, alpha: 1)
+//                }
+//                colorCnt += 1
+//            }
+//            if colorCnt==colorTotalCnt{
+//                break
+//            }
+//        }
+//        let tintedImage = UIGraphicsGetImageFromCurrentImageContext()!
+//        UIGraphicsEndImageContext()
+//        return tintedImage
+//    }
+//    func createImage(r:[CGFloat], g: [CGFloat], b:[CGFloat], a:[CGFloat]) -> UIImage {
+//        UIGraphicsBeginImageContextWithOptions(size, false, 0)
+//        let wid:Int = Int(size.width)
+//        let hei:Int = Int(size.height)
+//
+//        for w in 0..<wid {
+//            for h in 0..<hei {
+//                let index = (w * wid) + h
+//                UIColor(red: r[index], green: g[index], blue: b[index], alpha: a[index]).setFill()
+//                let drawRect = CGRect(x: w, y: h, width: 1, height: 1)
+//                UIRectFill(drawRect)
+//                draw(in: drawRect, blendMode: .destinationIn, alpha: 1)
+//            }
+//            print("createImage/h:",w)
+//        }
+//        let tintedImage = UIGraphicsGetImageFromCurrentImageContext()!
+//        UIGraphicsEndImageContext()
+//        return tintedImage
+//    }
 }
 
 
@@ -125,6 +125,9 @@ final class ViewController: UIViewController {
     @IBOutlet weak var saveButton: UIButton!
     var waveBoxView:UIImageView?
     var vhitBoxView:UIImageView?
+    
+    @IBOutlet weak var waveBoxV: UIImageView!
+    
     @IBOutlet weak var helpButton: UIButton!
     @IBOutlet weak var settingButton: UIButton!
     @IBOutlet weak var pauseARKitButton: UIButton!
@@ -244,7 +247,7 @@ final class ViewController: UIViewController {
             print(vHITwaves[i].face)
         }
 //        print(vHITwaves.count)
-//        drawVHITwaves()
+        drawVHITwaves()
     }
  
     func checksetPos(pos:Int,mode:Bool) -> Int{
@@ -336,11 +339,13 @@ final class ViewController: UIViewController {
         let drawPathEye = UIBezierPath()
         let drawPathFace = UIBezierPath()
         for i in 0..<vHITwaves.count{
-//            if vHITwaves[i].dispOn == false{//}
+//            if vHITwaves[i].isRight == false{//}
 //                continue
 //            }
+            pointListEye.removeAll()
+            pointListFace.removeAll()
             let dx = vHITwaves[i].isRight == true ? 0 : 260*r
-            for n in 0..<29{
+            for n in 0..<30{
                 let px = dx + CGFloat(n)*dx0*r
                 let py1 = -vHITwaves[i].eye[n]*r*1000 + posY0
                 let py2 = -vHITwaves[i].face[n]*r*1000 + posY0
@@ -395,68 +400,6 @@ final class ViewController: UIViewController {
         return image!
     }
    
-    func draw1wave(r:CGFloat){//just vHIT
-        var pointListEye = Array<CGPoint>()
-        var pointListFace = Array<CGPoint>()
-        let dx0=CGFloat(245.0/30.0)
-//        var rlPt:CGFloat = 0
-        //r:4(mail)  r:1(screen)
-        var posY0=135*r
-//        let vHITDisplayMode=0
-//        if vHITDisplayMode==0{//up down
-//            posY0=90*r
-//        }
-        
-        for i in 0..<vHITwaves.count{
-            if vHITwaves[i].dispOn == false{//} || vHITwaves[i].isRight == true{
-                continue
-            }
-            let dx = vHITwaves[i].isRight == true ? 0 : 260*r
-            for n in 0..<30{
-                let px = dx + CGFloat(n)*dx0*r
-                let py1 = -vHITwaves[i].eye[n]*r*1000 + posY0
-                let py2 = -vHITwaves[i].face[n]*r*1000 + posY0
-                let point1 = CGPoint(x:px,y:py1)
-                let point2 = CGPoint(x:px,y:py2)
-                pointListEye.append(point1)
-                pointListFace.append(point2)
-            }
-            // イメージ処理の開始
-            // パスの初期化
-            let drawPath1 = UIBezierPath()
-            let drawPath2 = UIBezierPath()
-            // 始点に移動する
-            drawPath1.move(to: pointListEye[0])
-            // 配列から始点の値を取り除く
-            pointListEye.removeFirst()
-            // 配列から点を取り出して連結していく
-            for pt in pointListEye {
-                drawPath1.addLine(to: pt)
-            }
-            drawPath2.move(to: pointListFace[0])
-            // 配列から始点の値を取り除く
-            pointListFace.removeFirst()
-            // 配列から点を取り出して連結していく
-            for pt in pointListFace {
-                drawPath2.addLine(to: pt)
-            }
-            // 線の色
-            UIColor.black.setStroke()
-            // 線幅
-            drawPath1.lineWidth = 0.3
-            drawPath2.lineWidth = 0.3
-            // 線の色
-            if vHITwaves[i].isRight==true{
-                UIColor.red.setStroke()
-            }else{
-                UIColor.blue.setStroke()
-            }
-            drawPath1.stroke()
-            UIColor.black.setStroke()
-            drawPath2.stroke()
-        }
-    }
-    
     func drawVHITwaves(){//解析結果のvHITwavesを表示する
 //        if vhitLineView != nil{
 //            vhitLineView?.removeFromSuperview()
@@ -680,6 +623,7 @@ final class ViewController: UIViewController {
         waveSlider.frame=CGRect(x:sp,y:sliderY,width: vw-sp*2,height:sliderHeight)
 
         waveBoxView?.frame=CGRect(x:0,y:sliderY-vw*180/320-sp*2,width:vw,height: vw*180/320)
+//        waveBoxV?.frame=CGRect(x:0,y:sliderY-vw*180/320-sp*2,width:vw,height: vw*180/320)
         vhitBoxView?.frame=CGRect(x:0,y:sliderY-vw*180/320-sp*2-vw*2/5-sp*2,width :vw,height:vw*2/5)
     }
     override func viewDidLayoutSubviews() {
