@@ -12,22 +12,6 @@ import MessageUI
 import ARKit
 import os
 extension UIImage {
-//    func pixelData() -> [UInt8]? {
-//        let size = self.size
-//        let dataSize = size.width * size.height * 4
-//        var pixelData = [UInt8](repeating: 0, count: Int(dataSize))
-//        let colorSpace = CGColorSpaceCreateDeviceRGB()
-//        let context = CGContext(data: &pixelData,
-//                                width: Int(size.width),
-//                                height: Int(size.height),
-//                                bitsPerComponent: 8,
-//                                bytesPerRow: 4 * Int(size.width),
-//                                space: colorSpace,
-//                                bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue)
-//        guard let cgImage = self.cgImage else { return nil }
-//        context?.draw(cgImage, in: CGRect(x: 0, y: 0, width: size.width, height: size.height))
-//        return pixelData
-//    }
     func resize(size _size: CGSize) -> UIImage? {
         let widthRatio = _size.width / size.width
         let heightRatio = _size.height / size.height
@@ -41,79 +25,7 @@ extension UIImage {
         UIGraphicsEndImageContext()
         return resizedImage
     }
-
-    
-//    func createGrayImage(r:[CGFloat], g: [CGFloat], b:[CGFloat], a:[CGFloat]) -> UIImage {
-//        UIGraphicsBeginImageContextWithOptions(size, false, 0)
-//        let wid:Int = Int(size.width)
-//        let hei:Int = Int(size.height)
-//
-//        for w in 0..<wid {
-//            for h in 0..<hei {
-//                let index = (w * wid) + h
-//                let color = 0.2126 * r[index] + 0.7152 * g[index] + 0.0722 * b[index]
-//                UIColor(red: color, green: color, blue: color, alpha: a[index]).setFill()
-//                let drawRect = CGRect(x: w, y: h, width: 1, height: 1)
-//                UIRectFill(drawRect)
-//                draw(in: drawRect, blendMode: .destinationIn, alpha: 1)
-//            }
-//        }
-//        let grayImage = UIGraphicsGetImageFromCurrentImageContext()!
-//        UIGraphicsEndImageContext()
-//        return grayImage
-//    }
-//
-//    func tint(color: [UIColor]) -> UIImage {
-//        UIGraphicsBeginImageContextWithOptions(size, false, 0)
-//        var colorCnt:Int = 0
-//        let colorTotalCnt=color.count
-//        for w in 0..<Int(size.width) {
-//            for h in 0..<Int(size.height) {
-//                let index = (w * Int(size.width)) + h
-//                if colorCnt==colorTotalCnt{
-//                    color[index-1].setFill()
-//                    let drawRect = CGRect(x: w, y: h, width: 1, height: 1)
-//                    UIRectFill(drawRect)
-//                    draw(in: drawRect, blendMode: .destinationIn, alpha: 0)
-//                    break
-//                }else{
-//                    color[index].setFill()
-//                    let drawRect = CGRect(x: w, y: h, width: 1, height: 1)
-//                    UIRectFill(drawRect)
-//                    draw(in: drawRect, blendMode: .destinationIn, alpha: 1)
-//                }
-//                colorCnt += 1
-//            }
-//            if colorCnt==colorTotalCnt{
-//                break
-//            }
-//        }
-//        let tintedImage = UIGraphicsGetImageFromCurrentImageContext()!
-//        UIGraphicsEndImageContext()
-//        return tintedImage
-//    }
-//    func createImage(r:[CGFloat], g: [CGFloat], b:[CGFloat], a:[CGFloat]) -> UIImage {
-//        UIGraphicsBeginImageContextWithOptions(size, false, 0)
-//        let wid:Int = Int(size.width)
-//        let hei:Int = Int(size.height)
-//
-//        for w in 0..<wid {
-//            for h in 0..<hei {
-//                let index = (w * wid) + h
-//                UIColor(red: r[index], green: g[index], blue: b[index], alpha: a[index]).setFill()
-//                let drawRect = CGRect(x: w, y: h, width: 1, height: 1)
-//                UIRectFill(drawRect)
-//                draw(in: drawRect, blendMode: .destinationIn, alpha: 1)
-//            }
-//            print("createImage/h:",w)
-//        }
-//        let tintedImage = UIGraphicsGetImageFromCurrentImageContext()!
-//        UIGraphicsEndImageContext()
-//        return tintedImage
-//    }
 }
-
-
 
 final class ViewController: UIViewController {
     let iroiro = myFunctions()
@@ -169,13 +81,7 @@ final class ViewController: UIViewController {
         print(vHITwaves[0])
         print(vHITwaves[1])
     }
-//    func g5(st:Int)->CGFloat{
-//        if st>3 && st<gyroMoved.count-2{
-//            return(gyroMoved[st-2]+gyroMoved[st-1]+gyroMoved[st]+gyroMoved[st+1]+gyroMoved[st+2])*2.0
-//        }
-//        return 0
-//    }
-    
+
     func upDownp(i:Int)->Int{//60hz -> 16.7ms
 //        let waveWidth:Int=80 vhitPeakまで
 //        let widthRange:Int=30
@@ -209,7 +115,7 @@ final class ViewController: UIViewController {
     }
     
     func setVHITWaves(number:Int) -> Int {//0:波なし 1:上向き波？ -1:その反対向きの波
-        let flatwidth:Int = 3//12frame-50ms
+        let flatwidth:Int = 2//12frame-50ms
         let t = upDownp(i: number + flatwidth)
         if t != 0 {
             if t==1{
@@ -336,13 +242,22 @@ final class ViewController: UIViewController {
         
         let drawPathEye = UIBezierPath()
         let drawPathFace = UIBezierPath()
+        var rightCnt:Int=0
+        var leftCnt:Int=0
         for i in 0..<vHITwaves.count{
 //            if vHITwaves[i].isRight == false{//}
 //                continue
 //            }
             pointListEye.removeAll()
             pointListFace.removeAll()
-            let dx = vHITwaves[i].isRight == true ? 0 : 260*r
+            var dx:CGFloat=0
+            if vHITwaves[i].isRight==true{
+                dx=0
+                rightCnt += 1
+            }else{
+                dx=260*r
+                leftCnt += 1
+            }
             for n in 0..<30{
                 let px = dx + CGFloat(n)*dx0*r
                 let py1 = -vHITwaves[i].eye[n]*r*1000 + posY0
@@ -384,6 +299,14 @@ final class ViewController: UIViewController {
             drawPathFace.stroke()
             drawPathFace.removeAllPoints()
         }
+        rightCnt.description.draw(at: CGPoint(x: 3*r, y: 0), withAttributes: [
+               NSAttributedString.Key.foregroundColor : UIColor.black,
+               NSAttributedString.Key.font : UIFont.monospacedDigitSystemFont(ofSize: 15*r, weight: UIFont.Weight.regular)])
+           
+        leftCnt.description.draw(at: CGPoint(x: 263*r, y: 0), withAttributes: [
+               NSAttributedString.Key.foregroundColor : UIColor.black,
+               NSAttributedString.Key.font : UIFont.monospacedDigitSystemFont(ofSize: 15*r, weight: UIFont.Weight.regular)])
+   
 //        // イメージコンテキストからUIImageを作る
         let image = UIGraphicsGetImageFromCurrentImageContext()
         // イメージ処理の終了
