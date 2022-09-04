@@ -66,10 +66,6 @@
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="plain" image="questionmark.circle" catalog="system"/>
                             </button>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="FvE-Mc-nmg">
-                                <rect key="frame" x="76" y="436" width="240" height="128"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                            </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -89,7 +85,6 @@
                         <outlet property="pauseARKitButton" destination="ukP-5L-4dH" id="c7x-n7-AUB"/>
                         <outlet property="saveButton" destination="Th0-5C-u7H" id="Zfb-pA-Y6x"/>
                         <outlet property="settingButton" destination="U5i-dq-oJP" id="XpC-y7-xyy"/>
-                        <outlet property="waveBoxV" destination="FvE-Mc-nmg" id="fr5-uJ-zKM"/>
                         <outlet property="waveSlider" destination="IUx-MW-Vmg" id="Uq7-bc-0vS"/>
                     </connections>
                 </viewController>

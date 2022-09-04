@@ -125,9 +125,7 @@ final class ViewController: UIViewController {
     @IBOutlet weak var saveButton: UIButton!
     var waveBoxView:UIImageView?
     var vhitBoxView:UIImageView?
-    
-    @IBOutlet weak var waveBoxV: UIImageView!
-    
+    var vhitBoxViewImage:UIImage?
     @IBOutlet weak var helpButton: UIButton!
     @IBOutlet weak var settingButton: UIButton!
     @IBOutlet weak var pauseARKitButton: UIButton!
@@ -244,10 +242,10 @@ final class ViewController: UIViewController {
         getVHITWaves()
         for i in 0..<vHITwaves.count{
             print(vHITwaves[i].frameN,vHITwaves[i].isRight)
-            print(vHITwaves[i].face)
+//            print(vHITwaves[i].face)
         }
-//        print(vHITwaves.count)
-        drawVHITwaves()
+        print(vHITwaves.count)
+        drawVHITBox()
     }
  
     func checksetPos(pos:Int,mode:Bool) -> Int{
@@ -273,7 +271,7 @@ final class ViewController: UIViewController {
         return return_n
     }
   
-    func drawvhitWaves(width w:CGFloat,height h:CGFloat) -> UIImage {
+    func drawVHIT(width w:CGFloat,height h:CGFloat) -> UIImage {
         let size = CGSize(width:w, height:h)
         var r:CGFloat=1//r:倍率magnification
         if w==500*4{//mail
@@ -386,82 +384,15 @@ final class ViewController: UIViewController {
             drawPathFace.stroke()
             drawPathFace.removeAllPoints()
         }
-        
-        
-        
-        
-        
-        
-        
 //        // イメージコンテキストからUIImageを作る
         let image = UIGraphicsGetImageFromCurrentImageContext()
         // イメージ処理の終了
         UIGraphicsEndImageContext()
         return image!
     }
-   
-    func drawVHITwaves(){//解析結果のvHITwavesを表示する
-//        if vhitLineView != nil{
-//            vhitLineView?.removeFromSuperview()
-//        }
-        //        let drawImage = drawWaves(width:view.bounds.width,height: view.bounds.width*2/5)
-        let drawImage = drawvhitWaves(width:500,height:200)
-        let dImage = drawImage.resize(size: CGSize(width:view.bounds.width, height:view.bounds.width*2/5))//view.bounds.width*2/5))
-        vhitBoxView = UIImageView(image: dImage)
-//        vhitLineView?.center =  CGPoint(x:view.bounds.width/2,y:vhitBoxYcenter)
-        // 画面に表示する
-        view.addSubview(vhitBoxView!)
-        //   showVog(f: true)
-    }
-    /*
-    func drawRealwave(){//vHIT_eye_head
-        if gyroLineView != nil{//これが無いとエラーがでる。
-            gyroLineView?.removeFromSuperview()
-            //            lineView?.isHidden = false
-        }
-        var startcnt:Int
-        if arrayDataCount < Int(self.view.bounds.width){//横幅以内なら０からそこまで表示
-            startcnt = 0
-        }else{//横幅超えたら、新しい横幅分を表示
-            startcnt = arrayDataCount - Int(self.view.bounds.width)
-        }
-        //波形を時間軸で表示
-        let drawImage = drawLine(num:startcnt,width:self.view.bounds.width,height:gyroBoxHeight)//180)
-        // イメージビューに設定する
-        gyroLineView = UIImageView(image: drawImage)
-        //       lineView?.center = self.view.center
-        gyroLineView?.center = CGPoint(x:view.bounds.width/2,y:gyroBoxYcenter)//340)//ここらあたりを変更se~7plusの大きさにも対応できた。
-        view.addSubview(gyroLineView!)
-        //      showBoxies(f: true)
-        //        print("count----" + "\(view.subviews.count)")
-    }
-    */
-    /*
-    func drawOnewave(startcount:Int){//vHIT_eye_head
-        var startcnt = startcount
-        if startcnt < 0 {
-            startcnt = 0
-        }
-        if gyroLineView != nil{//これが無いとエラーがでる。
-            gyroLineView?.removeFromSuperview()
-            //            lineView?.isHidden = false
-        }
-//        let posXCount=getPosXFilteredCount()
-        if arrayDataCount < Int(self.view.bounds.width){//横幅以内なら０からそこまで表示
-            startcnt = 0
-        }else if startcnt > arrayDataCount - Int(self.view.bounds.width){
-            startcnt = arrayDataCount - Int(self.view.bounds.width)
-        }
-        //波形を時間軸で表示
-        let drawImage = drawLine(num:startcnt,width:self.view.bounds.width,height:gyroBoxHeight)// 180)
-        // イメージビューに設定する
-        gyroLineView = UIImageView(image: drawImage)
-        //       lineView?.center = self.view.center
-        gyroLineView?.center = CGPoint(x:view.bounds.width/2,y:gyroBoxYcenter)// 340)
-        //ここらあたりを変更se~7plusの大きさにも対応できた。
-        view.addSubview(gyroLineView!)
-        //        print("count----" + "\(view.subviews.count)")
-    }*/
+
+ 
+  
     /*
      //上に中央vHITwaveをタップで表示させるタップ範囲を設定
      let temp = checksetPos(pos:lastVhitpoint + Int(loc.x),mode: 2)
@@ -473,7 +404,7 @@ final class ViewController: UIViewController {
          }
 //                    print("waveTuple:",waveTuple[temp].2)
      }
-     drawVHITwaves()
+    
      */
     
    
@@ -516,19 +447,7 @@ final class ViewController: UIViewController {
         self.view.layer.addSublayer(circleLayer)
 //        print("sublayer2:",view.layer.sublayers?.count)
     }
-    func drawOneWave(){
-        let endCnt = faceVeloX.count
-        var startCnt = endCnt-60//点の数
-       
-        if startCnt<0{
-            startCnt=0
-        }
-        //波形を時間軸で表示
-        let drawImage = drawLine(startCnt:startCnt,endCnt:endCnt)
-        // イメージビューに設定する
-        waveBoxView = UIImageView(image: drawImage)
-        view.addSubview(waveBoxView!)
-     }
+ 
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -547,7 +466,8 @@ final class ViewController: UIViewController {
 //        waveSlider.minimumTrackTintColor=UIColor.blue
         waveSlider.minimumTrackTintColor=UIColor.systemGray5
         waveSlider.maximumTrackTintColor=UIColor.systemGray5
-//        setButtons()
+        let drawImage = drawVHIT(width:500,height:200)
+        vhitBoxViewImage = drawImage.resize(size: CGSize(width:view.bounds.width, height:view.bounds.width*2/5))
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -600,7 +520,7 @@ final class ViewController: UIViewController {
             ltEyeVeloX.remove(at: 0)
             dateString.remove(at: 0)
         }
-        drawOneWave()
+        drawWaveBox()
     }
 
     func setButtons(){
@@ -623,7 +543,6 @@ final class ViewController: UIViewController {
         waveSlider.frame=CGRect(x:sp,y:sliderY,width: vw-sp*2,height:sliderHeight)
 
         waveBoxView?.frame=CGRect(x:0,y:sliderY-vw*180/320-sp*2,width:vw,height: vw*180/320)
-//        waveBoxV?.frame=CGRect(x:0,y:sliderY-vw*180/320-sp*2,width:vw,height: vw*180/320)
         vhitBoxView?.frame=CGRect(x:0,y:sliderY-vw*180/320-sp*2-vw*2/5-sp*2,width :vw,height:vw*2/5)
     }
     override func viewDidLayoutSubviews() {
@@ -647,14 +566,42 @@ final class ViewController: UIViewController {
     @objc func onWaveSliderValueChange(){
         let endCnt=Int(waveSlider.value)
         view.layer.sublayers?.removeLast()
-        
         let startCnt = endCnt-60//点の数
-        
         //波形を時間軸で表示
-        let drawImage = drawLine(startCnt:startCnt,endCnt:endCnt)
+        let drawImage = drawWave(startCnt:startCnt,endCnt:endCnt)
         // イメージビューに設定する
         waveBoxView = UIImageView(image: drawImage)
         view.addSubview(waveBoxView!)
+    }
+    func drawVHITBox(){//解析結果のvHITwavesを表示する
+//        view.layer.sublayers?.removeLast()
+//        onWaveSliderValueChange()
+        let drawImage = drawVHIT(width:500,height:200)
+        let dImage = drawImage.resize(size: CGSize(width:view.bounds.width, height:view.bounds.width*2/5))
+        vhitBoxView = UIImageView(image: dImage)
+        // 画面に表示する
+        view.addSubview(vhitBoxView!)
+    }
+    func drawVHITBox_first(){//解析結果のvHITwavesを表示する
+        let drawImage = drawVHIT(width:500,height:200)
+        let dImage = drawImage.resize(size: CGSize(width:view.bounds.width, height:view.bounds.width*2/5))
+        vhitBoxView = UIImageView(image: dImage)
+        // 画面に表示する
+        view.addSubview(vhitBoxView!)
+    }
+    func drawWaveBox(){
+        let endCnt = faceVeloX.count
+        var startCnt = endCnt-60//点の数
+        if startCnt<0{
+            startCnt=0
+        }
+        //波形を時間軸で表示
+        let drawImage = drawWave(startCnt:startCnt,endCnt:endCnt)
+        // イメージビューに設定する
+        waveBoxView = UIImageView(image: drawImage)
+//        vhitBoxView = UIImageView(image: vhitBoxViewImage)
+        view.addSubview(waveBoxView!)
+        print(view.subviews.count)
     }
     
     func setWaveSlider(){
@@ -663,7 +610,7 @@ final class ViewController: UIViewController {
         waveSlider.value=Float(faceVeloX.count)
         waveSlider.addTarget(self, action: #selector(onWaveSliderValueChange), for: UIControl.Event.valueChanged)
     }
-    func drawLine(startCnt:Int,endCnt:Int) -> UIImage {
+    func drawWave(startCnt:Int,endCnt:Int) -> UIImage {
         let size = CGSize(width:view.bounds.width, height:view.bounds.width*18/32)
         UIGraphicsBeginImageContextWithOptions(size, false, 1.0)
         // 折れ線にする点の配列
