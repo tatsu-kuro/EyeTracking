@@ -66,6 +66,14 @@
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="plain" image="questionmark.circle" catalog="system"/>
                             </button>
+                            <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" fixedFrame="YES" progress="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="hPJ-OI-IRK">
+                                <rect key="frame" x="132" y="126" width="150" height="4"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            </progressView>
+                            <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" fixedFrame="YES" progress="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="zdp-ix-doc">
+                                <rect key="frame" x="132" y="164" width="150" height="4"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            </progressView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -83,6 +91,8 @@
                         <outlet property="helpButton" destination="qi3-kF-0GR" id="8SN-KL-eQf"/>
                         <outlet property="mailButton" destination="u8R-5m-KZ9" id="NBj-D1-fd6"/>
                         <outlet property="pauseARKitButton" destination="ukP-5L-4dH" id="c7x-n7-AUB"/>
+                        <outlet property="progressEyeView" destination="zdp-ix-doc" id="N0g-x8-eoR"/>
+                        <outlet property="progressFaceView" destination="hPJ-OI-IRK" id="ya6-BV-3Ad"/>
                         <outlet property="saveButton" destination="Th0-5C-u7H" id="Zfb-pA-Y6x"/>
                         <outlet property="settingButton" destination="U5i-dq-oJP" id="XpC-y7-xyy"/>
                         <outlet property="waveSlider" destination="IUx-MW-Vmg" id="Uq7-bc-0vS"/>

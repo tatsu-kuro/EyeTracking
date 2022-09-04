@@ -28,6 +28,8 @@ extension UIImage {
 }
 
 final class ViewController: UIViewController {
+    @IBOutlet weak var progressFaceView: UIProgressView!
+    @IBOutlet weak var progressEyeView: UIProgressView!
     let iroiro = myFunctions()
     var multiEye:CGFloat=100
     var multiFace:CGFloat=100
@@ -55,7 +57,7 @@ final class ViewController: UIViewController {
     var gyroWs = [[Int]](repeating:[Int](repeating:0,count:125),count:80)
     var waveTuple = Array<(Int,Int,Int,Int)>()//rl,framenum,disp onoff,current disp onoff)
     var tempTuple = Array<(Int,Int,Int,Int)>()
-
+    var timer:Timer!
     struct wave {
         var isRight : Bool
         var frameN : Int
@@ -132,6 +134,7 @@ final class ViewController: UIViewController {
         return t
     }
     func getVHITWaves(){
+        vHITwaves.removeAll()
         if faceVeloX.count < 60 {// <1sec 16.7ms*60=1002ms
             return
         }
@@ -151,7 +154,7 @@ final class ViewController: UIViewController {
 //            print(vHITwaves[i].face)
         }
         print(vHITwaves.count)
-        drawVHITBox()
+//        drawVHITBox()
     }
  
     func checksetPos(pos:Int,mode:Bool) -> Int{
@@ -334,12 +337,21 @@ final class ViewController: UIViewController {
     var arKitFlag:Bool=true
     @IBAction func onPauseARKitButton(_ sender: Any) {
         
+        getVHITWaves()
         if arKitFlag==true && dateString.count>60{
             arKitFlag=false
             setWaveSlider()
             waveSlider.isEnabled=true
             waveSlider.minimumTrackTintColor=UIColor.blue
+            getVHITWaves()
 
+            
+     
+    
+            drawVHITBox()
+            
+            
+            
         }else{
             arKitFlag=true
             waveSlider.isEnabled=false
@@ -368,7 +380,7 @@ final class ViewController: UIViewController {
         // 円形を描画
         circleLayer.path = UIBezierPath.init(ovalIn: CGRect.init(x: 0, y: 0, width: circleFrame.size.width, height: circleFrame.size.height)).cgPath
         self.view.layer.addSublayer(circleLayer)
-//        print("sublayer2:",view.layer.sublayers?.count)
+        print("sublayer2:",view.layer.sublayers?.count)
     }
  
 
@@ -379,27 +391,19 @@ final class ViewController: UIViewController {
         dateString.removeAll()
         multiEye = iroiro.getUserDefaultCGFloat(str: "multiEye", ret: 100)
         multiFace = iroiro.getUserDefaultCGFloat(str: "multiFace", ret: 100)
- 
-        displayLink = CADisplayLink(target: self, selector: #selector(self.displayLinkUpdate))
-        displayLink!.preferredFramesPerSecond = 120
-//        view.addSubview(lookAtPointView)
-        session.delegate = self
-        displayLink?.add(to: RunLoop.main, forMode: .common)
+        timer = Timer.scheduledTimer(timeInterval: 1.0/60, target: self, selector: #selector(self.update), userInfo: nil, repeats: true)
+//        displayLink = CADisplayLink(target: self, selector: #selector(self.update))
+//        displayLink!.preferredFramesPerSecond = 60//120
+//        displayLink?.add(to: RunLoop.main, forMode: .common)
         displayLinkF=true
-//        waveSlider.minimumTrackTintColor=UIColor.blue
+        session.delegate = self
         waveSlider.minimumTrackTintColor=UIColor.systemGray5
         waveSlider.maximumTrackTintColor=UIColor.systemGray5
         let drawImage = drawVHIT(width:500,height:200)
+        setButtons()
         vhitBoxViewImage = drawImage.resize(size: CGSize(width:view.bounds.width, height:view.bounds.width*2/5))
     }
-
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        
-        let configuration = ARFaceTrackingConfiguration()
-        configuration.isLightEstimationEnabled = true
-        session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
-    }
+    
     var lastRtEyeX:CGFloat=0
     var lastLtEyeX:CGFloat=0
     var lastFaceX:CGFloat=0
@@ -408,6 +412,9 @@ final class ViewController: UIViewController {
     var rtEyeVeloX0:CGFloat=0
     var initFlag:Bool=true
     @objc func displayLinkUpdate() {
+    }
+
+    @objc func update(tm: Timer) {
         if arKitFlag==false{
             return
         }
@@ -432,11 +439,16 @@ final class ViewController: UIViewController {
             ltEyeVeloX.append(ltEyeVeloX0)
             drawCircle(cPoint:CGPoint(x:view.bounds.width/2+faceVeloX0*multiFace,y:y0),30,UIColor.red.cgColor)
             drawCircle(cPoint:CGPoint(x:view.bounds.width/2+ltEyeVeloX0*multiEye,y:y0+dy),30,UIColor.red.cgColor)
+//            progressFaceView.setProgress(0.5 + Float(faceVeloX0)*10, animated: true)
+//            progressEyeView.setProgress(0.5 + Float(ltEyeVeloX0)*10, animated: true)
         }else{//検出できていない時はappendしない
 //            faceVelocityX.append(faceVeloX)
 //            eyeVelocityX.append(ltEyeVeloX)
             drawCircle(cPoint:CGPoint(x:view.bounds.width/2+faceVeloX0,y:y0),30,UIColor.brown.cgColor)
             drawCircle(cPoint:CGPoint(x:view.bounds.width/2+ltEyeVeloX0,y:y0+dy),30,UIColor.brown.cgColor)
+//            progressFaceView.setProgress(0, animated: true)
+//            progressEyeView.setProgress(0, animated: true)
+
         }
         if faceVeloX.count>60*60*2{//2min
             faceVeloX.remove(at: 0)
@@ -445,9 +457,16 @@ final class ViewController: UIViewController {
         }
         drawWaveBox()
     }
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        let configuration = ARFaceTrackingConfiguration()
+        configuration.isLightEstimationEnabled = true
+        session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
+    }
 
     func setButtons(){
-//        let top=CGFloat(UserDefaults.standard.float(forKey: "top"))
+        let top=CGFloat(UserDefaults.standard.float(forKey: "top"))
         let bottom=CGFloat( UserDefaults.standard.float(forKey: "bottom"))
 
         let vw=view.bounds.width
@@ -455,11 +474,11 @@ final class ViewController: UIViewController {
         let bw=vw/6
         let bh=bw*2/3
         let by=view.bounds.height-bottom-sp-bh
-        myFunctions().setButtonProperty(mailButton,x:sp*1+bw*0,y:by,w:bw,h:bh,UIColor.systemBlue)
+        iroiro.setButtonProperty(mailButton,x:sp*1+bw*0,y:by,w:bw,h:bh,UIColor.systemBlue)
         iroiro.setButtonProperty(saveButton,x:sp*2+bw*1,y:by,w:bw,h:bh,UIColor.systemBlue)
         iroiro.setButtonProperty(pauseARKitButton,x:sp*3+bw*2,y:by,w:bw,h:bh,UIColor.systemBlue)
-        iroiro.setButtonProperty(settingButton,x:sp*4+bw*3,y:by,w:bw,h: bh,UIColor.systemBlue)
         iroiro.setButtonProperty(helpButton,x:sp*5+bw*4,y:by,w:bw,h: bh,UIColor.systemBlue)
+        iroiro.setButtonProperty(settingButton,x:sp*4+bw*3,y:by,w:bw,h: bh,UIColor.systemBlue)
         waveSlider.frame=CGRect(x:sp,y:by-bh,width: vw-sp*2,height:20)//とりあえず
         let sliderHeight=waveSlider.frame.height
         let sliderY=by-sp*2-sliderHeight
@@ -467,6 +486,10 @@ final class ViewController: UIViewController {
 
         waveBoxView?.frame=CGRect(x:0,y:sliderY-vw*180/320-sp*2,width:vw,height: vw*180/320)
         vhitBoxView?.frame=CGRect(x:0,y:sliderY-vw*180/320-sp*2-vw*2/5-sp*2,width :vw,height:vw*2/5)
+        progressFaceView.frame=CGRect(x:20,y:top+20,width: vw-40,height: 20)
+        progressEyeView.frame=CGRect(x:20,y:top+50,width: vw-40,height: 20)
+        progressEyeView.isHidden=true
+        progressFaceView.isHidden=true
     }
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
@@ -703,7 +726,7 @@ extension ViewController: ARSessionDelegate {
         let lag=CFAbsoluteTimeGetCurrent()-lastTime
 //        print(lag)
         lastTime=CFAbsoluteTimeGetCurrent()
-        //60hz前後の様だが、少し遅れると同じものを２回拾いそう、どうするか？
+        //60hz前後のことが多いが、30hzになってしまうことがある。どうする？
 
         //        let logger = Logger()
         //face, rightEye, leftEyeのx,y軸方向の回転角を出力
