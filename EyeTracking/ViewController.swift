@@ -190,8 +190,6 @@ final class ViewController: UIViewController {
         UIGraphicsBeginImageContextWithOptions(size, false, 1.0)
         // パスの初期化
         let drawPath = UIBezierPath()
-        
-//        let str1 = calcDate.components(separatedBy: ":")
         let str2 = "ID:"// + idString + "  " + str1[0] + ":" + str1[1]
         let str3 = "vHIT96da"
         str2.draw(at: CGPoint(x: 5*r, y: 180*r), withAttributes: [
@@ -230,12 +228,9 @@ final class ViewController: UIViewController {
         }
         drawPath.stroke()
         drawPath.removeAllPoints()
-//        draw1wave(r: r)//just vHIT
-        
         var pointListEye = Array<CGPoint>()
         var pointListFace = Array<CGPoint>()
         let dx0=CGFloat(245.0/30.0)
-//        var rlPt:CGFloat = 0
         //r:4(mail)  r:1(screen)
         var posY0=135*r
         let vHITDisplayMode=0
@@ -248,9 +243,6 @@ final class ViewController: UIViewController {
         var rightCnt:Int=0
         var leftCnt:Int=0
         for i in 0..<vHITwaves.count{
-//            if vHITwaves[i].isRight == false{//}
-//                continue
-//            }
             pointListEye.removeAll()
             pointListFace.removeAll()
             var dx:CGFloat=0
