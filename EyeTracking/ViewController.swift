@@ -37,9 +37,10 @@ final class ViewController: UIViewController {
     var faceVeloX = Array<CGFloat>()
     var dateString = Array<String>()
     @IBOutlet weak var saveButton: UIButton!
-    var waveBoxView:UIImageView?
-    var vhitBoxView:UIImageView?
-    var vhitBoxViewImage:UIImage?
+    @IBOutlet weak var waveBoxView: UIImageView!
+    @IBOutlet weak var vHITBoxView: UIImageView!
+//    var vhitBoxView:UIImageView?
+//    var vhitBoxViewImage:UIImage?
     @IBOutlet weak var helpButton: UIButton!
     @IBOutlet weak var settingButton: UIButton!
     @IBOutlet weak var pauseARKitButton: UIButton!
@@ -335,7 +336,6 @@ final class ViewController: UIViewController {
             waveSlider.isEnabled=true
             waveSlider.minimumTrackTintColor=UIColor.blue
             getVHITWaves()
-//            view.layer.sublayers?.removeLast()
             drawVHITBox()
         }else{
             arKitFlag=true
@@ -384,10 +384,9 @@ final class ViewController: UIViewController {
         session.delegate = self
         waveSlider.minimumTrackTintColor=UIColor.systemGray5
         waveSlider.maximumTrackTintColor=UIColor.systemGray5
-        let drawImage = drawVHIT(width:500,height:200)
         setButtons()
-        vhitBoxViewImage = drawImage.resize(size: CGSize(width:view.bounds.width, height:view.bounds.width*2/5))
-    }
+        drawVHITBox()
+     }
     
     var lastRtEyeX:CGFloat=0
     var lastLtEyeX:CGFloat=0
@@ -402,11 +401,6 @@ final class ViewController: UIViewController {
     @objc func update(tm: Timer) {
         if arKitFlag==false{
             return
-        }
-        if initFlag==true{
-            initFlag=false
-        }else{
-            view.layer.sublayers?.removeLast()
         }
         let y0:CGFloat=view.bounds.height/4-50
         let dy:CGFloat=50
@@ -467,8 +461,10 @@ final class ViewController: UIViewController {
         let sliderY=by-sp*2-sliderHeight
         waveSlider.frame=CGRect(x:sp,y:sliderY,width: vw-sp*2,height:sliderHeight)
 
-        waveBoxView?.frame=CGRect(x:0,y:sliderY-vw*180/320-sp*2,width:vw,height: vw*180/320)
-        vhitBoxView?.frame=CGRect(x:0,y:sliderY-vw*180/320-sp*2-vw*2/5-sp*2,width :vw,height:vw*2/5)
+//        vhitBoxView?.frame=CGRect(x:0,y:sliderY-vw*180/320-sp*2-vw*2/5-sp*2,width :vw,height:vw*2/5)
+        waveBoxView.frame=CGRect(x:0,y:sliderY-vw*180/320-sp*2,width:vw,height: vw*180/320)
+        vHITBoxView.frame=CGRect(x:0,y:sliderY-vw*180/320-sp*2-vw*2/5-sp*2,width :vw,height:vw*2/5)
+
         progressFaceView.frame=CGRect(x:20,y:top+20,width: vw-40,height: 20)
         progressEyeView.frame=CGRect(x:20,y:top+50,width: vw-40,height: 20)
 //        progressEyeView.isHidden=true
@@ -491,47 +487,56 @@ final class ViewController: UIViewController {
         //        }
         setButtons()
     }
-    var initOnWaveSlideF:Bool=true
+//    var initOnWaveSlideF:Bool=true
     @objc func onWaveSliderValueChange(){
         let endCnt=Int(waveSlider.value)
-        if initOnWaveSlideF==true{
-            initOnWaveSlideF=false
-        }else{
-            view.layer.sublayers?.removeLast()
-        }
+        waveBoxView.layer.sublayers?.removeLast()
         let startCnt = endCnt-60//点の数
         //波形を時間軸で表示
         let drawImage = drawWave(startCnt:startCnt,endCnt:endCnt)
         // イメージビューに設定する
-        waveBoxView = UIImageView(image: drawImage)
-        view.addSubview(waveBoxView!)
+        let waveView = UIImageView(image: drawImage)
+        waveBoxView.addSubview(waveView)
     }
+    var initDrawVHITBoxFlag:Bool=true
     func drawVHITBox(){//解析結果のvHITwavesを表示する
+        if initDrawVHITBoxFlag==true{
+            initDrawVHITBoxFlag=false
+        }else{
+            vHITBoxView.layer.sublayers?.removeLast()
+        }
+        
         let drawImage = drawVHIT(width:500,height:200)
         let dImage = drawImage.resize(size: CGSize(width:view.bounds.width, height:view.bounds.width*2/5))
-        vhitBoxView = UIImageView(image: dImage)
+        let vhitView = UIImageView(image: dImage)
         // 画面に表示する
-        view.addSubview(vhitBoxView!)
+        vHITBoxView.addSubview(vhitView)
     }
-    func drawVHITBox_first(){//解析結果のvHITwavesを表示する
-        let drawImage = drawVHIT(width:500,height:200)
-        let dImage = drawImage.resize(size: CGSize(width:view.bounds.width, height:view.bounds.width*2/5))
-        vhitBoxView = UIImageView(image: dImage)
-        // 画面に表示する
-        view.addSubview(vhitBoxView!)
-    }
+//    func drawVHITBox_first(){//解析結果のvHITwavesを表示する
+//        let drawImage = drawVHIT(width:500,height:200)
+//        let dImage = drawImage.resize(size: CGSize(width:view.bounds.width, height:view.bounds.width*2/5))
+//        vhitBoxView = UIImageView(image: dImage)
+//        // 画面に表示する
+//        view.addSubview(vhitBoxView!)
+//    }
+    var initDrawBoxF:Bool=true
     func drawWaveBox(){
         let endCnt = faceVeloX.count
         var startCnt = endCnt-60//点の数
         if startCnt<0{
             startCnt=0
         }
+        if initDrawBoxF==true{
+            initDrawBoxF=false
+        }else{
+            waveBoxView.layer.sublayers?.removeLast()
+        }
         //波形を時間軸で表示
         let drawImage = drawWave(startCnt:startCnt,endCnt:endCnt)
         // イメージビューに設定する
-        waveBoxView = UIImageView(image: drawImage)
+        let waveView = UIImageView(image: drawImage)
 //        vhitBoxView = UIImageView(image: vhitBoxViewImage)
-        view.addSubview(waveBoxView!)
+        waveBoxView.addSubview(waveView)
         print(view.subviews.count)
     }
     

@@ -76,6 +76,14 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="progressTintColor" red="1" green="0.14913141730000001" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             </progressView>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Xci-au-vH8">
+                                <rect key="frame" x="98" y="223" width="240" height="128"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            </imageView>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="QFZ-Io-KaX">
+                                <rect key="frame" x="104" y="373" width="240" height="128"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -97,6 +105,8 @@
                         <outlet property="progressFaceView" destination="hPJ-OI-IRK" id="ioR-Fm-fOA"/>
                         <outlet property="saveButton" destination="Th0-5C-u7H" id="Zfb-pA-Y6x"/>
                         <outlet property="settingButton" destination="U5i-dq-oJP" id="XpC-y7-xyy"/>
+                        <outlet property="vHITBoxView" destination="QFZ-Io-KaX" id="SZh-Ku-fSG"/>
+                        <outlet property="waveBoxView" destination="Xci-au-vH8" id="jn1-uG-NSY"/>
                         <outlet property="waveSlider" destination="IUx-MW-Vmg" id="Uq7-bc-0vS"/>
                     </connections>
                 </viewController>
