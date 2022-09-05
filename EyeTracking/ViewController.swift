@@ -392,11 +392,11 @@ final class ViewController: UIViewController {
         // パスの初期化
         let drawPath = UIBezierPath()
         let str2 = "ID:" + idString
-        let str3 = "vHIT96da"
+        let str3 = "ARKit-vHIT"
         str2.draw(at: CGPoint(x: 5*r, y: 180*r), withAttributes: [
             NSAttributedString.Key.foregroundColor : UIColor.black,
             NSAttributedString.Key.font : UIFont.monospacedDigitSystemFont(ofSize: 15*r, weight: UIFont.Weight.regular)])
-        str3.draw(at: CGPoint(x: 428*r, y: 180*r), withAttributes: [
+        str3.draw(at: CGPoint(x: 415*r, y: 180*r), withAttributes: [
             NSAttributedString.Key.foregroundColor : UIColor.black,
             NSAttributedString.Key.font : UIFont.monospacedDigitSystemFont(ofSize: 15*r, weight: UIFont.Weight.regular)])
         
@@ -635,15 +635,15 @@ final class ViewController: UIViewController {
             ltEyeVeloX.append(ltEyeVeloX0)
 //            drawCircle(cPoint:CGPoint(x:view.bounds.width/2+faceVeloX0*multiFace,y:y0),30,UIColor.red.cgColor)
 //            drawCircle(cPoint:CGPoint(x:view.bounds.width/2+ltEyeVeloX0*multiEye,y:y0+dy),30,UIColor.red.cgColor)
-            progressFaceView.setProgress(0.5 + Float(faceVeloX0)*10, animated: true)
-            progressEyeView.setProgress(0.5 + Float(ltEyeVeloX0)*10, animated: true)
+            progressFaceView.setProgress(0.5 + Float(faceVeloX0)*10, animated: false)
+            progressEyeView.setProgress(0.5 + Float(ltEyeVeloX0)*10, animated: false)
         }else{//検出できていない時はappendしない
 //            faceVelocityX.append(faceVeloX)
 //            eyeVelocityX.append(ltEyeVeloX)
 //            drawCircle(cPoint:CGPoint(x:view.bounds.width/2+faceVeloX0,y:y0),30,UIColor.brown.cgColor)
 //            drawCircle(cPoint:CGPoint(x:view.bounds.width/2+ltEyeVeloX0,y:y0+dy),30,UIColor.brown.cgColor)
-            progressFaceView.setProgress(0, animated: true)
-            progressEyeView.setProgress(0, animated: true)
+            progressFaceView.setProgress(0, animated: false)
+            progressEyeView.setProgress(0, animated: false)
 
         }
         if faceVeloX.count>60*60*2{//2min
@@ -822,7 +822,7 @@ final class ViewController: UIViewController {
             drawPath2.stroke()
             var text=dateString[endCnt-1]
             if arKitFlag==false{
-                text += "  face:" + Int(-faceVeloX[endCnt-1]*100000).description + " eye:" + Int(-ltEyeVeloX[endCnt-1]*100000).description + " n:" + endCnt.description
+                text += "  n:" + endCnt.description + " face:" + Int(-faceVeloX[endCnt-1]*100000).description + " eye:" + Int(-ltEyeVeloX[endCnt-1]*100000).description
             }
             text.draw(at:CGPoint(x:3,y:3),withAttributes: [
                 NSAttributedString.Key.foregroundColor : UIColor.black,
