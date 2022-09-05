@@ -4,6 +4,13 @@
 //
 //  Created by Ken Kuroda on 8/28/22.
 //
+
+
+
+
+
+
+
 import UIKit
 import AVFoundation
 import AssetsLibrary
@@ -28,6 +35,8 @@ extension UIImage {
 }
 
 final class ViewController: UIViewController {
+//    let Wave96da:String="Wave96da"
+
     @IBOutlet weak var progressFaceView: UIProgressView!
     @IBOutlet weak var progressEyeView: UIProgressView!
     let iroiro = myFunctions()
@@ -149,38 +158,229 @@ final class ViewController: UIViewController {
         }
     }
     @IBAction func tapGesture(_ sender: UITapGestureRecognizer) {
-        getVHITWaves()
-        for i in 0..<vHITwaves.count{
-            print(vHITwaves[i].frameN,vHITwaves[i].isRight)
-//            print(vHITwaves[i].face)
-        }
-        print(vHITwaves.count)
-//        drawVHITBox()
+        setDispONToggle()
+        drawVHITBox()
     }
  
-    func checksetPos(pos:Int,mode:Bool) -> Int{
+    func setCurrWave(frame:Int){
         let cnt=vHITwaves.count
-        var return_n = -2
-        if cnt>0{
-            for i in 0..<cnt{
-                if vHITwaves[i].frameN<pos && vHITwaves[i].frameN+30>pos{
-                    vHITwaves[i].currDispOn = mode //sellected
-                    return_n = i
-                    break
-                }
-                vHITwaves[i].currDispOn = false//not sellected
+        for i in 0..<cnt{
+            if vHITwaves[i].frameN>frame-30-15 && vHITwaves[i].frameN<frame-30{
+                vHITwaves[i].currDispOn = true //sellected
+            }else{
+            vHITwaves[i].currDispOn = false//not sellected
             }
-            if return_n > -1 && return_n < cnt{
-                for n in (return_n + 1)..<cnt{
-                    vHITwaves[n].currDispOn = false
-                }
-            }
-        }else{
-            return -1
         }
-        return return_n
     }
-  
+    func setDispONToggle(){
+        let cnt=vHITwaves.count
+        for i in 0..<cnt{
+            if vHITwaves[i].currDispOn==true{
+                vHITwaves[i].dispOn = !vHITwaves[i].dispOn
+            }
+        }
+    }
+    
+    var path2albumDoneFlag:Bool=false//不必要かもしれないが念の為
+    func savePath2album(path:String){
+        path2albumDoneFlag=false
+        savePath2album_sub(path: path)
+        while path2albumDoneFlag == false{
+            sleep(UInt32(0.2))
+        }
+    }
+ 
+    func savePath2album_sub(path:String){
+        
+        if let dir = FileManager.default.urls( for: .documentDirectory, in: .userDomainMask ).first {
+            
+            let fileURL = dir.appendingPathComponent( path )
+            
+            PHPhotoLibrary.shared().performChanges({ [self] in
+                let assetRequest = PHAssetChangeRequest.creationRequestForAssetFromImage(atFileURL: fileURL)!
+                let albumChangeRequest = PHAssetCollectionChangeRequest(for:  iroiro.getPHAssetcollection())
+                let placeHolder = assetRequest.placeholderForCreatedAsset
+                albumChangeRequest?.addAssets([placeHolder!] as NSArray)
+            }) { (isSuccess, error) in
+                if isSuccess {
+                    self.path2albumDoneFlag=true
+                    // 保存成功
+                } else {
+                    self.path2albumDoneFlag=true
+                    // 保存失敗
+                }
+            }
+        }
+    }
+
+    func saveImage2path(image:UIImage,path:String) {//imageを保存
+        if let dir = FileManager.default.urls( for: .documentDirectory, in: .userDomainMask ).first {
+            let path_url = dir.appendingPathComponent( path )
+            let pngImageData = image.pngData()
+            do {
+                try pngImageData!.write(to: path_url, options: .atomic)
+//                saving2pathFlag=false
+            } catch {
+                print("write err")//エラー処理
+            }
+        }
+    }
+    
+    func existFile(aFile:String)->Bool{
+        if let dir = FileManager.default.urls( for: .documentDirectory, in: .userDomainMask ).first {
+            
+            let path_url = dir.appendingPathComponent( aFile )
+            let fileManager = FileManager.default
+            if fileManager.fileExists(atPath: path_url.path){
+                return true
+            }else{
+                return false
+            }
+            
+        }
+        return false
+    }
+    var idString:String=""
+    @IBAction func onSaveButton(_ sender: Any) {
+        
+//        if calcFlag == true || vogImageView?.isHidden == true || vogImageView == nil{
+//            return
+//        }
+//
+        let alert = UIAlertController(title: "input ID", message: "", preferredStyle: .alert)
+        let saveAction = UIAlertAction(title: "OK", style: .default) { [self] (action:UIAlertAction!) -> Void in
+            
+            // 入力したテキストをコンソールに表示
+            let textField = alert.textFields![0] as UITextField
+            #if DEBUG
+            print("\(String(describing: textField.text))")
+            #endif
+            self.idString = textField.text!// Field2value(field: textField)
+            
+//            let textField = alert.textFields![0] as UITextField
+  //            idString = textField.text!
+            let drawImage = drawVHIT(width:500*4,height:200*4)
+            //まずtemp.pngに保存して、それをvHIT_VOGアルバムにコピーする
+            saveImage2path(image: drawImage, path: "temp.jpeg")
+            while existFile(aFile: "temp.jpeg") == false{
+                sleep(UInt32(0.1))
+            }
+            savePath2album(path: "temp.jpeg")
+
+         }
+        let cancelAction = UIAlertAction(title: "Cancel", style: .default) { (action:UIAlertAction!) -> Void in
+            self.idString = ""//キャンセルしてもここは通らない？
+        }
+        // UIAlertControllerにtextFieldを追加
+        alert.addTextField { (textField:UITextField!) -> Void in
+            textField.keyboardType = UIKeyboardType.default//numbersAndPunctuation// decimalPad// default// denumberPad
+            
+        }
+        alert.addAction(cancelAction)//この行と下の行の並びを変えるとCancelとOKの左右が入れ替わる。
+        alert.addAction(saveAction)
+        present(alert, animated: true, completion: nil)
+    }
+    
+//    var path2albumDoneFlag:Bool=false//不必要かもしれないが念の為
+//    func savePath2album(name:String,path:String){
+//        path2albumDoneFlag=false
+//        savePath2album_sub(name:name,path: path)
+//        while path2albumDoneFlag==false{
+//            sleep(UInt32(0.2))
+//        }
+//    }
+//    func getPHAssetcollection(albumTitle:String)->PHAssetCollection{
+//        let requestOptions = PHImageRequestOptions()
+//        requestOptions.isSynchronous = true
+//        requestOptions.isNetworkAccessAllowed = false
+//        requestOptions.deliveryMode = .highQualityFormat //これでもicloud上のvideoを取ってしまう
+//        //アルバムをフェッチ
+//        let assetFetchOptions = PHFetchOptions()
+//        assetFetchOptions.predicate = NSPredicate(format: "title == %@", albumTitle)
+//        let assetCollections = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .smartAlbumVideos, options: assetFetchOptions)
+//        //ここはunwindから呼ばれる。アルバムはprepareで作っているはず？
+//        //        if (assetCollections.count > 0) {
+//        //同じ名前のアルバムは一つしかないはずなので最初のオブジェクトを使用
+//        return assetCollections.object(at:0)
+//    }
+//    func savePath2album_sub(name:String,path:String){
+//        if let dir = FileManager.default.urls( for: .documentDirectory, in: .userDomainMask ).first {
+//            let fileURL = dir.appendingPathComponent( path )
+//            PHPhotoLibrary.shared().performChanges({ [self] in
+//                let assetRequest = PHAssetChangeRequest.creationRequestForAssetFromImage(atFileURL: fileURL)!
+//                let albumChangeRequest = PHAssetCollectionChangeRequest(for: getPHAssetcollection(albumTitle: name))
+//                let placeHolder = assetRequest.placeholderForCreatedAsset
+//                albumChangeRequest?.addAssets([placeHolder!] as NSArray)
+//            }) { (isSuccess, error) in
+//                if isSuccess {
+//                    self.path2albumDoneFlag=true
+//                    // 保存成功
+//                } else {
+//                    self.path2albumDoneFlag=true
+//                    // 保存失敗
+//                }
+//            }
+//        }
+//    }
+//    func saveJpegImage2path(image:UIImage,path:String) {//imageを保存
+//        if let dir = FileManager.default.urls( for: .documentDirectory, in: .userDomainMask ).first {
+//            let path_url = dir.appendingPathComponent( path )
+//            let jpegImageData = image.jpegData(compressionQuality: 1.0)
+//            do {
+//                try jpegImageData!.write(to: path_url, options: .atomic)
+////                saving2pathFlag=false
+//            } catch {
+//                print("gyroData.txt write err")//エラー処理
+//            }
+//        }
+//    }
+//    func existFile(aFile:String)->Bool{
+//        if let dir = FileManager.default.urls( for: .documentDirectory, in: .userDomainMask ).first {
+//
+//            let path_url = dir.appendingPathComponent( aFile )
+//            let fileManager = FileManager.default
+//            if fileManager.fileExists(atPath: path_url.path){
+//                return true
+//            }else{
+//                return false
+//            }
+//
+//        }
+//        return false
+//    }
+//    var idString:String=""
+//    @IBAction func onSaveButton(_ sender: Any) {
+//        if vHITwaves.count < 1 {
+//            return
+//        }
+//        let alert = UIAlertController(title: "vHIT96da", message: "Input ID", preferredStyle: .alert)
+//        let saveAction = UIAlertAction(title: "OK", style: .default) { [self] (action:UIAlertAction!) -> Void in
+//            // 入力したテキストをコンソールに表示
+//            let textField = alert.textFields![0] as UITextField
+//            idString = textField.text!
+//            let drawImage = drawVHIT(width:500*4,height:200*4)
+//            //まずtemp.pngに保存して、それをvHIT_VOGアルバムにコピーする
+//            saveJpegImage2path(image: drawImage, path: "temp.jpeg")
+//            while existFile(aFile: "temp.jpeg") == false{
+//                sleep(UInt32(0.1))
+//            }
+//            savePath2album(name:Wave96da,path: "temp.jpeg")
+////            calcDrawVHIT(tuple: false)//idnumber表示のため,waveTupleは変更しない
+////            // イメージビューに設定する
+////            //            UIImageWriteToSavedPhotosAlbum(drawImage, nil, nil, nil)
+////            nonsavedFlag = false //解析結果がsaveされたのでfalse
+//        }
+//
+//        let cancelAction = UIAlertAction(title: "Cancel", style: .default) { (action:UIAlertAction!) -> Void in
+//        }
+//        // UIAlertControllerにtextFieldを追加
+//        alert.addTextField { (textField:UITextField!) -> Void in
+//            textField.keyboardType = UIKeyboardType.default//.numberPad
+//        }
+//        alert.addAction(cancelAction)//この行と下の行の並びを変えるとCancelとOKの左右が入れ替わる。
+//        alert.addAction(saveAction)
+//        present(alert, animated: true, completion: nil)
+//    }
     func drawVHIT(width w:CGFloat,height h:CGFloat) -> UIImage {
         let size = CGSize(width:w, height:h)
         var r:CGFloat=1//r:倍率magnification
@@ -191,7 +391,7 @@ final class ViewController: UIViewController {
         UIGraphicsBeginImageContextWithOptions(size, false, 1.0)
         // パスの初期化
         let drawPath = UIBezierPath()
-        let str2 = "ID:"// + idString + "  " + str1[0] + ":" + str1[1]
+        let str2 = "ID:" + idString
         let str3 = "vHIT96da"
         str2.draw(at: CGPoint(x: 5*r, y: 180*r), withAttributes: [
             NSAttributedString.Key.foregroundColor : UIColor.black,
@@ -256,8 +456,8 @@ final class ViewController: UIViewController {
             }
             for n in 0..<30{
                 let px = dx + CGFloat(n)*dx0*r
-                let py1 = vHITwaves[i].eye[n]*r*1000 + posY0
-                let py2 = vHITwaves[i].face[n]*r*1000 + posY0
+                let py1 = vHITwaves[i].eye[n]*r*multiEye + posY0
+                let py2 = vHITwaves[i].face[n]*r*multiFace + posY0
                 let point1 = CGPoint(x:px,y:py1)
                 let point2 = CGPoint(x:px,y:py2)
                 pointListEye.append(point1)
@@ -287,8 +487,27 @@ final class ViewController: UIViewController {
                 UIColor.blue.setStroke()
             }
             // 線幅
-            drawPathEye.lineWidth = 0.3
-            drawPathFace.lineWidth = 0.3
+            print("currOn:",i.description,vHITwaves[i].currDispOn)
+            if vHITwaves[i].currDispOn==true && vHITwaves[i].dispOn==true {
+                drawPathEye.lineWidth = 2
+                drawPathFace.lineWidth = 2
+            }else if vHITwaves[i].currDispOn==true && vHITwaves[i].dispOn==false {
+                drawPathEye.lineWidth = 0.3
+                drawPathFace.lineWidth = 0.3
+            }else if vHITwaves[i].currDispOn==false && vHITwaves[i].dispOn==true {
+                drawPathEye.lineWidth = 0.3
+                drawPathFace.lineWidth = 0.3
+            }else if vHITwaves[i].currDispOn==false && vHITwaves[i].dispOn==false {
+                drawPathEye.lineWidth = 0
+                drawPathFace.lineWidth = 0
+            }
+            if r==4 && vHITwaves[i].dispOn==true{
+                drawPathEye.lineWidth = 0.3
+                drawPathFace.lineWidth = 0.3
+            }else if r==4 {
+                drawPathEye.lineWidth = 0
+                drawPathFace.lineWidth = 0
+            }
             drawPathEye.stroke()
             drawPathEye.removeAllPoints()
             UIColor.black.setStroke()
@@ -497,6 +716,9 @@ final class ViewController: UIViewController {
         // イメージビューに設定する
         let waveView = UIImageView(image: drawImage)
         waveBoxView.addSubview(waveView)
+        setCurrWave(frame: endCnt)
+//        vHITwaves[0].currDispOn=true
+        drawVHITBox()
     }
     var initDrawVHITBoxFlag:Bool=true
     func drawVHITBox(){//解析結果のvHITwavesを表示する
