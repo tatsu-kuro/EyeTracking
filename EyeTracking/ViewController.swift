@@ -42,14 +42,9 @@ final class ViewController: UIViewController {
     let iroiro = myFunctions()
     var multiEye:CGFloat=100
     var multiFace:CGFloat=100
-    var ltEyeVeloX = Array<CGFloat>()
-    var faceVeloX = Array<CGFloat>()
-    var dateString = Array<String>()
     @IBOutlet weak var saveButton: UIButton!
     @IBOutlet weak var waveBoxView: UIImageView!
     @IBOutlet weak var vHITBoxView: UIImageView!
-//    var vhitBoxView:UIImageView?
-//    var vhitBoxViewImage:UIImage?
     @IBOutlet weak var helpButton: UIButton!
     @IBOutlet weak var settingButton: UIButton!
     @IBOutlet weak var pauseARKitButton: UIButton!
@@ -68,7 +63,7 @@ final class ViewController: UIViewController {
     var waveTuple = Array<(Int,Int,Int,Int)>()//rl,framenum,disp onoff,current disp onoff)
     var tempTuple = Array<(Int,Int,Int,Int)>()
     var timer:Timer!
-    struct wave {
+    struct vHIT {
         var isRight : Bool
         var frameN : Int
         var dispOn : Bool
@@ -76,29 +71,36 @@ final class ViewController: UIViewController {
         var eye = [CGFloat](repeating:0,count:31)
         var face = [CGFloat](repeating:0,count:31)
     }
+    struct wave{
+        var ltEye:CGFloat
+        var rtEye:CGFloat
+        var face:CGFloat
+        var date:String
+    }
+    var waves=[wave]()
 //    struct allWave{
 //        var ltEye:CGFloat
 //        var rtEye:CGFloat
 //        var face:CGRect
 //        var date:String
 //    }
-    var vHITwaves = [wave]()
+    var vHITs = [vHIT]()
     var vHITwave = [CGFloat](repeating: 0, count: 31)
-    func append_vHITwaves(isRight:Bool,frameN:Int,dispOn:Bool,currDispOn:Bool){
-        let temp=wave(isRight: isRight,frameN: frameN, dispOn: dispOn, currDispOn: currDispOn,eye:vHITwave,face:vHITwave)
-        vHITwaves.append(temp)
+    func append_vHITs(isRight:Bool,frameN:Int,dispOn:Bool,currDispOn:Bool){
+        let temp=vHIT(isRight: isRight,frameN: frameN, dispOn: dispOn, currDispOn: currDispOn,eye:vHITwave,face:vHITwave)
+        vHITs.append(temp)
     }
-    func init_vHITwaves(num:Int){
-        let temp=wave(isRight: true,frameN: 0, dispOn: true, currDispOn: true,eye:vHITwave,face:vHITwave)
-        for _ in 0...num{
-            vHITwaves.append(temp)
-        }
-        vHITwaves[0].eye[5]=1
-        vHITwaves[0].dispOn=false
-        vHITwaves[1].isRight=false
-        print(vHITwaves[0])
-        print(vHITwaves[1])
-    }
+//    func init_vHITwaves(num:Int){
+//        let temp=vHIT(isRight: true,frameN: 0, dispOn: true, currDispOn: true,eye:vHITwave,face:vHITwave)
+//        for _ in 0...num{
+//            vHITs.append(temp)
+//        }
+//        vHITs[0].eye[5]=1
+//        vHITs[0].dispOn=false
+//        vHITs[1].isRight=false
+//        print(vHITs[0])
+//        print(vHITs[1])
+//    }
 
     func upDownp(i:Int)->Int{//60hz -> 16.7ms
 //        let waveWidth:Int=80 vhitPeakまで
@@ -106,13 +108,13 @@ final class ViewController: UIViewController {
         let naf:Int=5//84ms  waveWidth*60/1000
         let raf:Int=2//33ms  widthRange*60/1000
         let sl:CGFloat=0//slope
-        let g1=faceVeloX[i+1]-faceVeloX[i]// st:i+1)-g5(st:i)
-        let g2=faceVeloX[i+2]-faceVeloX[i+1]// st:i+1)-g5(st:i)
-        let g3=faceVeloX[i+3]-faceVeloX[i+2]// st:i+1)-g5(st:i)
-        let ga=faceVeloX[i+naf-raf+1]-faceVeloX[i+naf-raf]// st:i+1)-g5(st:i)
-        let gb=faceVeloX[i+naf-raf+2]-faceVeloX[i+naf-raf+1]// st:i+1)-g5(st:i)
-        let gc=faceVeloX[i+naf+raf+1]-faceVeloX[i+naf+raf]// st:i+1)-g5(st:i)
-        let gd=faceVeloX[i+naf+raf+2]-faceVeloX[i+naf+raf+1]// st:i+1)-g5(st:i)
+        let g1=waves[i+1].face-waves[i].face// st:i+1)-g5(st:i)
+        let g2=waves[i+2].face-waves[i+1].face// st:i+1)-g5(st:i)
+        let g3=waves[i+3].face-waves[i+2].face// st:i+1)-g5(st:i)
+        let ga=waves[i+naf-raf+1].face-waves[i+naf-raf].face// st:i+1)-g5(st:i)
+        let gb=waves[i+naf-raf+2].face-waves[i+naf-raf+1].face// st:i+1)-g5(st:i)
+        let gc=waves[i+naf+raf+1].face-waves[i+naf+raf].face// st:i+1)-g5(st:i)
+        let gd=waves[i+naf+raf+2].face-waves[i+naf+raf+1].face// st:i+1)-g5(st:i)
 //
 //        if       g1 > 4  && g2>g1+1 && g3>g2+1 && ga >  sl && gb > sl  && gc < -sl  && gd < -sl  {
 //            return -1
@@ -137,25 +139,25 @@ final class ViewController: UIViewController {
         let t = upDownp(i: number + flatwidth)
         if t != 0 {
             if t==1{
-                append_vHITwaves(isRight:true,frameN:number,dispOn:true,currDispOn:false)
+                append_vHITs(isRight:true,frameN:number,dispOn:true,currDispOn:false)
             }else{
-                append_vHITwaves(isRight:false,frameN:number,dispOn:true,currDispOn:false)
+                append_vHITs(isRight:false,frameN:number,dispOn:true,currDispOn:false)
             }
-            let n=vHITwaves.count-1
+            let n=vHITs.count-1
             for i in 0..<31{//number..<number + 30{
-                vHITwaves[n].eye[i]=ltEyeVeloX[number+i]
-                vHITwaves[n].face[i]=faceVeloX[number+i]
+                vHITs[n].eye[i]=waves[number+i].ltEye
+                vHITs[n].face[i]=waves[number+i].face
             }
         }
         return t
     }
     func getVHITWaves(){
-        vHITwaves.removeAll()
-        if faceVeloX.count < 60 {// <1sec 16.7ms*60=1002ms
+        vHITs.removeAll()
+        if waves.count < 60 {// <1sec 16.7ms*60=1002ms
             return
         }
         var skipCnt:Int = 0
-        for vcnt in 30..<(faceVeloX.count - 40) {//501ms 668ms
+        for vcnt in 30..<(waves.count - 40) {//501ms 668ms
             if skipCnt > 0{
                 skipCnt -= 1
             }else if setVHITWaves(number:vcnt) != 0{
@@ -169,20 +171,20 @@ final class ViewController: UIViewController {
     }
  
     func setCurrWave(frame:Int){
-        let cnt=vHITwaves.count
+        let cnt=vHITs.count
         for i in 0..<cnt{
-            if vHITwaves[i].frameN>frame-30-15 && vHITwaves[i].frameN<frame-30{
-                vHITwaves[i].currDispOn = true //sellected
+            if vHITs[i].frameN>frame-30-15 && vHITs[i].frameN<frame-30{
+                vHITs[i].currDispOn = true //sellected
             }else{
-            vHITwaves[i].currDispOn = false//not sellected
+            vHITs[i].currDispOn = false//not sellected
             }
         }
     }
     func setDispONToggle(){
-        let cnt=vHITwaves.count
+        let cnt=vHITs.count
         for i in 0..<cnt{
-            if vHITwaves[i].currDispOn==true{
-                vHITwaves[i].dispOn = !vHITwaves[i].dispOn
+            if vHITs[i].currDispOn==true{
+                vHITs[i].dispOn = !vHITs[i].dispOn
             }
         }
     }
@@ -248,11 +250,9 @@ final class ViewController: UIViewController {
     }
     var idString:String=""
     @IBAction func onSaveButton(_ sender: Any) {
-        
-//        if calcFlag == true || vogImageView?.isHidden == true || vogImageView == nil{
-//            return
-//        }
-//
+        if waves.count<1{
+            return
+        }
         let alert = UIAlertController(title: "input ID", message: "", preferredStyle: .alert)
         let saveAction = UIAlertAction(title: "OK", style: .default) { [self] (action:UIAlertAction!) -> Void in
             
@@ -272,7 +272,7 @@ final class ViewController: UIViewController {
                 sleep(UInt32(0.1))
             }
             savePath2album(path: "temp.jpeg")
-
+            drawVHITBox()
          }
         let cancelAction = UIAlertAction(title: "Cancel", style: .default) { (action:UIAlertAction!) -> Void in
             self.idString = ""//キャンセルしてもここは通らない？
@@ -397,9 +397,9 @@ final class ViewController: UIViewController {
         UIGraphicsBeginImageContextWithOptions(size, false, 1.0)
         // パスの初期化
         let drawPath = UIBezierPath()
-        let str1 = dateString.count == 0 ? "" : dateString[dateString.count-1].description
+        let str1 = waves.count == 0 ? "" : waves[waves.count-1].date.description
         let str2 = "ID:" + idString
-        let str3 = "ARKit-vHIT"
+        let str3 = "ARKit"
         str1.draw(at: CGPoint(x: 258*r, y: 180*r), withAttributes: [
             NSAttributedString.Key.foregroundColor : UIColor.black,
             NSAttributedString.Key.font : UIFont.monospacedDigitSystemFont(ofSize: 15*r, weight: UIFont.Weight.regular)])
@@ -407,9 +407,9 @@ final class ViewController: UIViewController {
         str2.draw(at: CGPoint(x: 5*r, y: 180*r), withAttributes: [
             NSAttributedString.Key.foregroundColor : UIColor.black,
             NSAttributedString.Key.font : UIFont.monospacedDigitSystemFont(ofSize: 15*r, weight: UIFont.Weight.regular)])
-//        str3.draw(at: CGPoint(x: 415*r, y: 180*r), withAttributes: [
-//            NSAttributedString.Key.foregroundColor : UIColor.black,
-//            NSAttributedString.Key.font : UIFont.monospacedDigitSystemFont(ofSize: 15*r, weight: UIFont.Weight.regular)])
+        str3.draw(at: CGPoint(x: 455*r, y: 180*r), withAttributes: [
+            NSAttributedString.Key.foregroundColor : UIColor.black,
+            NSAttributedString.Key.font : UIFont.monospacedDigitSystemFont(ofSize: 15*r, weight: UIFont.Weight.regular)])
         
         UIColor.black.setStroke()
         var pList = Array<CGPoint>()
@@ -454,11 +454,11 @@ final class ViewController: UIViewController {
         let drawPathFace = UIBezierPath()
         var rightCnt:Int=0
         var leftCnt:Int=0
-        for i in 0..<vHITwaves.count{
+        for i in 0..<vHITs.count{
             pointListEye.removeAll()
             pointListFace.removeAll()
             var dx:CGFloat=0
-            if vHITwaves[i].isRight==true{
+            if vHITs[i].isRight==true{
                 dx=0
                 rightCnt += 1
             }else{
@@ -467,8 +467,8 @@ final class ViewController: UIViewController {
             }
             for n in 0..<30{
                 let px = dx + CGFloat(n)*dx0*r
-                let py1 = vHITwaves[i].eye[n]*r*multiEye + posY0
-                let py2 = vHITwaves[i].face[n]*r*multiFace + posY0
+                let py1 = vHITs[i].eye[n]*r*multiEye + posY0
+                let py2 = vHITs[i].face[n]*r*multiFace + posY0
                 let point1 = CGPoint(x:px,y:py1)
                 let point2 = CGPoint(x:px,y:py2)
                 pointListEye.append(point1)
@@ -492,27 +492,27 @@ final class ViewController: UIViewController {
                 drawPathFace.addLine(to: pt)
             }
               // 線の色
-            if vHITwaves[i].isRight==true{
+            if vHITs[i].isRight==true{
                 UIColor.red.setStroke()
             }else{
                 UIColor.blue.setStroke()
             }
             // 線幅
-            print("currOn:",i.description,vHITwaves[i].currDispOn)
-            if vHITwaves[i].currDispOn==true && vHITwaves[i].dispOn==true {
+            print("currOn:",i.description,vHITs[i].currDispOn)
+            if vHITs[i].currDispOn==true && vHITs[i].dispOn==true {
                 drawPathEye.lineWidth = 2
                 drawPathFace.lineWidth = 2
-            }else if vHITwaves[i].currDispOn==true && vHITwaves[i].dispOn==false {
+            }else if vHITs[i].currDispOn==true && vHITs[i].dispOn==false {
                 drawPathEye.lineWidth = 0.3
                 drawPathFace.lineWidth = 0.3
-            }else if vHITwaves[i].currDispOn==false && vHITwaves[i].dispOn==true {
+            }else if vHITs[i].currDispOn==false && vHITs[i].dispOn==true {
                 drawPathEye.lineWidth = 0.3
                 drawPathFace.lineWidth = 0.3
-            }else if vHITwaves[i].currDispOn==false && vHITwaves[i].dispOn==false {
+            }else if vHITs[i].currDispOn==false && vHITs[i].dispOn==false {
                 drawPathEye.lineWidth = 0
                 drawPathFace.lineWidth = 0
             }
-            if r==4 && vHITwaves[i].dispOn==true{
+            if r==4 && vHITs[i].dispOn==true{
                 drawPathEye.lineWidth = 0.3
                 drawPathFace.lineWidth = 0.3
             }else if r==4 {
@@ -539,28 +539,11 @@ final class ViewController: UIViewController {
         UIGraphicsEndImageContext()
         return image!
     }
-
- 
-  
-    /*
-     //上に中央vHITwaveをタップで表示させるタップ範囲を設定
-     let temp = checksetPos(pos:lastVhitpoint + Int(loc.x),mode: 2)
-     if temp >= 0{
-         if waveTuple[temp].2 == 1{
-             waveTuple[temp].2 = 0//hide
-          }else{
-             waveTuple[temp].2 = 1//disp
-         }
-//                    print("waveTuple:",waveTuple[temp].2)
-     }
-    
-     */
-    
    
     var arKitFlag:Bool=true
     @IBAction func onPauseARKitButton(_ sender: Any) {
         getVHITWaves()
-        if arKitFlag==true && dateString.count>60{
+        if arKitFlag==true && waves.count>60{
             arKitFlag=false
             setWaveSlider()
             waveSlider.isEnabled=true
@@ -581,36 +564,16 @@ final class ViewController: UIViewController {
         return .portrait
     }
 
-//    func drawCircle(cPoint:CGPoint,_ diameter:CGFloat,_ color:CGColor){
-//        /* --- 円を描画 --- */
-//        let circleLayer = CAShapeLayer.init()
-//        let circleFrame = CGRect.init(x:cPoint.x-diameter/2,y:cPoint.y-diameter/2,width:diameter,height:diameter)
-//        circleLayer.frame = circleFrame
-//        // 輪郭の色
-//        circleLayer.strokeColor = UIColor.white.cgColor
-//        // 円の中の色
-//        circleLayer.fillColor = color
-//        // 輪郭の太さ
-//        circleLayer.lineWidth = 0.5
-//        // 円形を描画
-//        circleLayer.path = UIBezierPath.init(ovalIn: CGRect.init(x: 0, y: 0, width: circleFrame.size.width, height: circleFrame.size.height)).cgPath
-//        self.view.layer.addSublayer(circleLayer)
-//        print("sublayer2:",view.layer.sublayers?.count)
-//    }
- 
-
     override func viewDidLoad() {
         super.viewDidLoad()
-        ltEyeVeloX.removeAll()
-        faceVeloX.removeAll()
-        dateString.removeAll()
+        waves.removeAll()
         multiEye = iroiro.getUserDefaultCGFloat(str: "multiEye", ret: 100)
         multiFace = iroiro.getUserDefaultCGFloat(str: "multiFace", ret: 100)
         timer = Timer.scheduledTimer(timeInterval: 1.0/60, target: self, selector: #selector(self.update), userInfo: nil, repeats: true)
 //        displayLink = CADisplayLink(target: self, selector: #selector(self.update))
 //        displayLink!.preferredFramesPerSecond = 60//120
 //        displayLink?.add(to: RunLoop.main, forMode: .common)
-        displayLinkF=true
+//        displayLinkF=true
         session.delegate = self
         waveSlider.minimumTrackTintColor=UIColor.systemGray5
         waveSlider.maximumTrackTintColor=UIColor.systemGray5
@@ -632,34 +595,21 @@ final class ViewController: UIViewController {
         if arKitFlag==false{
             return
         }
-        let y0:CGFloat=view.bounds.height/4-50
-        let dy:CGFloat=50
-
         if faceAnchorFlag==true{//} && faceAnchorFlag == lastFlag{
             let date = Date()
             let df = DateFormatter()
             df.dateFormat = "yyyy-MM-dd HH:mm:ss"
             // 2019-10-19 17:01:09
-            dateString.append(df.string(from: date))
-            faceVeloX.append(faceVeloX0)
-            ltEyeVeloX.append(ltEyeVeloX0)
-//            drawCircle(cPoint:CGPoint(x:view.bounds.width/2+faceVeloX0*multiFace,y:y0),30,UIColor.red.cgColor)
-//            drawCircle(cPoint:CGPoint(x:view.bounds.width/2+ltEyeVeloX0*multiEye,y:y0+dy),30,UIColor.red.cgColor)
+            
+            waves.append(wave(ltEye:ltEyeVeloX0,rtEye:ltEyeVeloX0,face:faceVeloX0,date:df.string(from:date)))
             progressFaceView.setProgress(0.5 + Float(faceVeloX0)*10, animated: false)
             progressEyeView.setProgress(0.5 + Float(ltEyeVeloX0)*10, animated: false)
         }else{//検出できていない時はappendしない
-//            faceVelocityX.append(faceVeloX)
-//            eyeVelocityX.append(ltEyeVeloX)
-//            drawCircle(cPoint:CGPoint(x:view.bounds.width/2+faceVeloX0,y:y0),30,UIColor.brown.cgColor)
-//            drawCircle(cPoint:CGPoint(x:view.bounds.width/2+ltEyeVeloX0,y:y0+dy),30,UIColor.brown.cgColor)
             progressFaceView.setProgress(0, animated: false)
             progressEyeView.setProgress(0, animated: false)
-
         }
-        if faceVeloX.count>60*60*2{//2min
-            faceVeloX.remove(at: 0)
-            ltEyeVeloX.remove(at: 0)
-            dateString.remove(at: 0)
+        if waves.count>60*60*2{//2min
+            waves.remove(at: 0)
         }
         drawWaveBox()
     }
@@ -753,7 +703,7 @@ final class ViewController: UIViewController {
 //    }
     var initDrawBoxF:Bool=true
     func drawWaveBox(){
-        let endCnt = faceVeloX.count
+        let endCnt = waves.count
         var startCnt = endCnt-60//点の数
         if startCnt<0{
             startCnt=0
@@ -774,8 +724,8 @@ final class ViewController: UIViewController {
     
     func setWaveSlider(){
         waveSlider.minimumValue = 60
-        waveSlider.maximumValue = Float(faceVeloX.count)
-        waveSlider.value=Float(faceVeloX.count)
+        waveSlider.maximumValue = Float(waves.count)
+        waveSlider.value=Float(waves.count)
         waveSlider.addTarget(self, action: #selector(onWaveSliderValueChange), for: UIControl.Event.valueChanged)
     }
     func drawWave(startCnt:Int,endCnt:Int) -> UIImage {
@@ -794,8 +744,8 @@ final class ViewController: UIViewController {
         if endCnt>5{
             for n in startCnt..<endCnt{
                 let px = dx * CGFloat(n-startCnt)
-                py1 = faceVeloX[n] * multiFace + y1
-                py2 = ltEyeVeloX[n] * multiEye + y2
+                py1 = waves[n].face * multiFace + y1
+                py2 = waves[n].ltEye * multiEye + y2
                 let point1 = CGPoint(x: px, y: py1)
                 let point2 = CGPoint(x: px, y: py2)
                 pointList1.append(point1)
@@ -830,9 +780,9 @@ final class ViewController: UIViewController {
             drawPath2.lineWidth = 0.3
             UIColor.red.setStroke()
             drawPath2.stroke()
-            var text=dateString[endCnt-1]
+            var text=waves[endCnt-1].date
             if arKitFlag==false{
-                text += "  n:" + endCnt.description + " face:" + Int(-faceVeloX[endCnt-1]*100000).description + " eye:" + Int(-ltEyeVeloX[endCnt-1]*100000).description
+                text += "  n:" + endCnt.description + " face:" + Int(-waves[endCnt-1].face*100000).description + " eye:" + Int(-waves[endCnt-1].ltEye*100000).description
             }
             text.draw(at:CGPoint(x:3,y:3),withAttributes: [
                 NSAttributedString.Key.foregroundColor : UIColor.black,
@@ -884,8 +834,8 @@ final class ViewController: UIViewController {
                 if moveThumX>moveThumY{//横移動の和＞縦移動の和
 //                    var endCnt=Int(waveSlider.value)
                     var endCnt=startCnt + Int(move.x/10)
-                    if endCnt>faceVeloX.count-1{
-                        endCnt=faceVeloX.count-1
+                    if endCnt>waves.count-1{
+                        endCnt=waves.count-1
                     }else if endCnt<60{
                         endCnt=60
                     }
