@@ -76,6 +76,12 @@ final class ViewController: UIViewController {
         var eye = [CGFloat](repeating:0,count:31)
         var face = [CGFloat](repeating:0,count:31)
     }
+//    struct allWave{
+//        var ltEye:CGFloat
+//        var rtEye:CGFloat
+//        var face:CGRect
+//        var date:String
+//    }
     var vHITwaves = [wave]()
     var vHITwave = [CGFloat](repeating: 0, count: 31)
     func append_vHITwaves(isRight:Bool,frameN:Int,dispOn:Bool,currDispOn:Bool){
@@ -391,14 +397,19 @@ final class ViewController: UIViewController {
         UIGraphicsBeginImageContextWithOptions(size, false, 1.0)
         // パスの初期化
         let drawPath = UIBezierPath()
+        let str1 = dateString.count == 0 ? "" : dateString[dateString.count-1].description
         let str2 = "ID:" + idString
         let str3 = "ARKit-vHIT"
+        str1.draw(at: CGPoint(x: 258*r, y: 180*r), withAttributes: [
+            NSAttributedString.Key.foregroundColor : UIColor.black,
+            NSAttributedString.Key.font : UIFont.monospacedDigitSystemFont(ofSize: 15*r, weight: UIFont.Weight.regular)])
+
         str2.draw(at: CGPoint(x: 5*r, y: 180*r), withAttributes: [
             NSAttributedString.Key.foregroundColor : UIColor.black,
             NSAttributedString.Key.font : UIFont.monospacedDigitSystemFont(ofSize: 15*r, weight: UIFont.Weight.regular)])
-        str3.draw(at: CGPoint(x: 415*r, y: 180*r), withAttributes: [
-            NSAttributedString.Key.foregroundColor : UIColor.black,
-            NSAttributedString.Key.font : UIFont.monospacedDigitSystemFont(ofSize: 15*r, weight: UIFont.Weight.regular)])
+//        str3.draw(at: CGPoint(x: 415*r, y: 180*r), withAttributes: [
+//            NSAttributedString.Key.foregroundColor : UIColor.black,
+//            NSAttributedString.Key.font : UIFont.monospacedDigitSystemFont(ofSize: 15*r, weight: UIFont.Weight.regular)])
         
         UIColor.black.setStroke()
         var pList = Array<CGPoint>()
@@ -628,7 +639,6 @@ final class ViewController: UIViewController {
             let date = Date()
             let df = DateFormatter()
             df.dateFormat = "yyyy-MM-dd HH:mm:ss"
-//            print(df.string(from: date))
             // 2019-10-19 17:01:09
             dateString.append(df.string(from: date))
             faceVeloX.append(faceVeloX0)
