@@ -166,6 +166,9 @@ final class ViewController: UIViewController {
         }
     }
     @IBAction func tapGesture(_ sender: UITapGestureRecognizer) {
+        if arKitFlag==true{
+            return
+        }
         setDispONToggle()
         drawVHITBox()
     }
@@ -498,7 +501,7 @@ final class ViewController: UIViewController {
                 UIColor.blue.setStroke()
             }
             // 線幅
-            print("currOn:",i.description,vHITs[i].currDispOn)
+//            print("currOn:",i.description,vHITs[i].currDispOn)
             if vHITs[i].currDispOn==true && vHITs[i].dispOn==true {
                 drawPathEye.lineWidth = 2
                 drawPathFace.lineWidth = 2
@@ -544,6 +547,7 @@ final class ViewController: UIViewController {
     @IBAction func onPauseARKitButton(_ sender: Any) {
         getVHITWaves()
         if arKitFlag==true && waves.count>60{
+            session.pause()
             arKitFlag=false
             setWaveSlider()
             waveSlider.isEnabled=true
@@ -551,6 +555,10 @@ final class ViewController: UIViewController {
             getVHITWaves()
             drawVHITBox()
         }else{
+        
+            let configuration = ARFaceTrackingConfiguration()
+            configuration.isLightEstimationEnabled = true
+            session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
             arKitFlag=true
             waveSlider.isEnabled=false
             waveSlider.minimumTrackTintColor=UIColor.systemGray5
@@ -804,6 +812,9 @@ final class ViewController: UIViewController {
     var startCnt:Int=0
     
     @IBAction func panGesture1(_ sender: UIPanGestureRecognizer) {
+        if arKitFlag==true{
+            return
+        }
         let move:CGPoint = sender.translation(in: self.view)
         if sender.state == .began {
             moveThumX=0
@@ -866,7 +877,6 @@ final class ViewController: UIViewController {
                 }
                 }
                 onWaveSliderValueChange()
-                //            drawOnewave(startcount: vhitCurpoint)
             }
             
         }else if sender.state == .ended{
@@ -896,7 +906,7 @@ extension ViewController: ARSessionDelegate {
         lastLtEyeX=ltEyeXTemp
         lastRtEyeX=rtEyeXTemp
         let lag=CFAbsoluteTimeGetCurrent()-lastTime
-//        print(lag)
+        print(lag)
         lastTime=CFAbsoluteTimeGetCurrent()
         //60hz前後のことが多いが、30hzになってしまうことがある。どうする？
 
