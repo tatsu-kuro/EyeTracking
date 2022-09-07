@@ -110,7 +110,7 @@ final class ViewController: UIViewController {
         let naf:Int=5//84ms  waveWidth*60/1000
         let raf:Int=2//33ms  widthRange*60/1000
         let sl:CGFloat=0.002//slope
-        if waves[i].face>0.001 || waves[i].face < -0.001{
+        if waves[i].face>0.003 || waves[i].face < -0.003{
             return 0
         }
         let g1=waves[i+1].face-waves[i].face
@@ -780,8 +780,28 @@ final class ViewController: UIViewController {
             UIColor.red.setStroke()
             drawPath2.stroke()
             var text=waves[endCnt-1].date
-            if arKitFlag==false{
-                text += "  n:" + endCnt.description + " face:" + Int(-waves[endCnt-1].face*10000).description + " eye:" + Int(-waves[endCnt-1].ltEye*10000).description
+            var text2:String=""
+            if arKitFlag==false && endCnt<waves.count-15{
+                text += "  n:" + endCnt.description + " face:" + Int(-waves[endCnt-1].face*10000).description
+                //+ " eye:" + Int(-waves[endCnt-1].ltEye*10000).description
+                text2 += Int(-waves[endCnt-1].face*10000).description + ","
+                text2 += Int(-waves[endCnt].face*10000).description + ","
+                text2 += Int(-waves[endCnt+1].face*10000).description + ","
+                text2 += Int(-waves[endCnt+2].face*10000).description + ","
+                text2 += Int(-waves[endCnt+3].face*10000).description + ","
+                text2 += Int(-waves[endCnt+4].face*10000).description + ","
+                text2 += Int(-waves[endCnt+5].face*10000).description + ","
+                text2 += Int(-waves[endCnt+6].face*10000).description + ","
+//                text2 += Int(-waves[endCnt+7].face*10000).description + ","
+//                text2 += Int(-waves[endCnt+8].face*10000).description + ","
+//                text2 += Int(-waves[endCnt+9].face*10000).description + ","
+//                text2 += Int(-waves[endCnt+10].face*10000).description + ","
+//                text2 += Int(-waves[endCnt+11].face*10000).description + ","
+//                text2 += Int(-waves[endCnt+12].face*10000).description + ","
+                text2.draw(at:CGPoint(x:3,y:3+20),withAttributes: [
+                    NSAttributedString.Key.foregroundColor : UIColor.black,
+                    NSAttributedString.Key.font : UIFont.monospacedDigitSystemFont(ofSize: 13, weight: UIFont.Weight.regular)])
+
             }
             text.draw(at:CGPoint(x:3,y:3),withAttributes: [
                 NSAttributedString.Key.foregroundColor : UIColor.black,
