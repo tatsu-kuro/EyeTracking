@@ -42,12 +42,14 @@ final class ViewController: UIViewController {
     let iroiro = myFunctions()
     var multiEye:CGFloat=100
     var multiFace:CGFloat=100
+    @IBOutlet weak var deleteButton: UIButton!
     @IBOutlet weak var saveButton: UIButton!
     @IBOutlet weak var waveBoxView: UIImageView!
     @IBOutlet weak var vHITBoxView: UIImageView!
     @IBOutlet weak var helpButton: UIButton!
     @IBOutlet weak var settingButton: UIButton!
-    @IBOutlet weak var pauseARKitButton: UIButton!
+    @IBOutlet weak var ARKitButton: UIButton!
+    @IBOutlet weak var pauseButton: UIButton!
     @IBOutlet weak var mailButton: UIButton!
     @IBOutlet weak var waveSlider: UISlider!
     var displayLinkF:Bool=false
@@ -293,10 +295,14 @@ final class ViewController: UIViewController {
         UIGraphicsBeginImageContextWithOptions(size, false, 1.0)
         // パスの初期化
         let drawPath = UIBezierPath()
-        let str1 = waves.count == 0 ? "" : waves[waves.count-1].date.description
+        var date = waves.count == 0 ? "" : waves[waves.count-1].date.description
+        if waves.count>0{
+        let date1=date.components(separatedBy: ":")
+            date=date1[0] + ":" + date1[1]
+        }
         let str2 = "ID:" + idString
         let str3 = "ARKit"
-        str1.draw(at: CGPoint(x: 258*r, y: 180*r), withAttributes: [
+        date.draw(at: CGPoint(x: 258*r, y: 180*r), withAttributes: [
             NSAttributedString.Key.foregroundColor : UIColor.black,
             NSAttributedString.Key.font : UIFont.monospacedDigitSystemFont(ofSize: 15*r, weight: UIFont.Weight.regular)])
 
@@ -451,26 +457,50 @@ final class ViewController: UIViewController {
         UIGraphicsEndImageContext()
         return image!
     }
-   
-    var arKitFlag:Bool=true
-    @IBAction func onPauseARKitButton(_ sender: Any) {
-        getVHITWaves()
+    @IBAction func onDeleteButton(_ sender: Any) {
+        if waves.count>59{
+            waves.removeAll()
+            vHITs.removeAll()
+            drawVHITBox()//(width: 500, height: 200)
+            drawWaveBox()//(startCnt: 0, endCnt: 0)
+            waveSlider.isEnabled=false
+            waveSlider.minimumTrackTintColor=UIColor.gray
+            waveSlider.maximumTrackTintColor=UIColor.gray
+        }
+    }
+    
+    @IBAction func onPauseButton(_ sender: Any) {
         if arKitFlag==true && waves.count>60{
             session.pause()
             arKitFlag=false
             setWaveSlider()
             waveSlider.isEnabled=true
             waveSlider.minimumTrackTintColor=UIColor.blue
+            waveSlider.maximumTrackTintColor=UIColor.blue
             getVHITWaves()
             drawVHITBox()
+        }
+    }
+    var arKitFlag:Bool=true
+    @IBAction func onARKitButton(_ sender: Any) {
+        getVHITWaves()
+        if arKitFlag==true && waves.count>60{
+//            session.pause()
+//            arKitFlag=false
+//            setWaveSlider()
+//            waveSlider.isEnabled=true
+//            waveSlider.minimumTrackTintColor=UIColor.blue
+//            waveSlider.maximumTrackTintColor=UIColor.blue
+//            getVHITWaves()
+//            drawVHITBox()
         }else{
-        
             let configuration = ARFaceTrackingConfiguration()
             configuration.isLightEstimationEnabled = true
             session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
             arKitFlag=true
             waveSlider.isEnabled=false
-            waveSlider.minimumTrackTintColor=UIColor.systemGray5
+            waveSlider.minimumTrackTintColor=UIColor.gray
+            waveSlider.maximumTrackTintColor=UIColor.gray
         }
     }
     
@@ -492,8 +522,10 @@ final class ViewController: UIViewController {
 //        displayLink?.add(to: RunLoop.main, forMode: .common)
 //        displayLinkF=true
         session.delegate = self
-        waveSlider.minimumTrackTintColor=UIColor.systemGray5
-        waveSlider.maximumTrackTintColor=UIColor.systemGray5
+
+        waveSlider.minimumTrackTintColor=UIColor.gray
+        waveSlider.maximumTrackTintColor=UIColor.gray
+
         setButtons()
         drawVHITBox()
      }
@@ -532,26 +564,39 @@ final class ViewController: UIViewController {
     }
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
         let configuration = ARFaceTrackingConfiguration()
         configuration.isLightEstimationEnabled = true
         session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
     }
-
-    func setButtons(){
+    /*
+    func setButtons1(){
+        //        print("setbuttons_first")
         let top=CGFloat(UserDefaults.standard.float(forKey: "top"))
         let bottom=CGFloat( UserDefaults.standard.float(forKey: "bottom"))
-
         let vw=view.bounds.width
-        let sp=vw/36
-        let bw=vw/6
-        let bh=bw*2/3
-        let by=view.bounds.height-bottom-sp-bh
-        iroiro.setButtonProperty(mailButton,x:sp*1+bw*0,y:by,w:bw,h:bh,UIColor.systemBlue)
-        iroiro.setButtonProperty(saveButton,x:sp*2+bw*1,y:by,w:bw,h:bh,UIColor.systemBlue)
-        iroiro.setButtonProperty(pauseARKitButton,x:sp*3+bw*2,y:by,w:bw,h:bh,UIColor.systemBlue)
-        iroiro.setButtonProperty(helpButton,x:sp*5+bw*4,y:by,w:bw,h: bh,UIColor.systemBlue)
-        iroiro.setButtonProperty(settingButton,x:sp*4+bw*3,y:by,w:bw,h: bh,UIColor.systemBlue)
+        let ww=view.bounds.width
+        let wh=view.bounds.height
+        let sp:CGFloat=10
+        let bw=(vw-10*sp)/7
+        let bh=bw
+        let by=view.bounds.height-bottom-sp*2-bh
+    
+        let by2=wh-bottom-sp-10-2.9*bh//videoSlider
+        waveSlider.frame = CGRect(x: 20, y:by2, width: ww - 40, height: bh)
+
+        iroiro.setButtonProperty(mailButton,x:sp*2+bw*0,y:by,w:bw,h:bh,UIColor.systemBlue)
+        iroiro.setButtonProperty(saveButton,x:sp*3+bw*1,y:by,w:bw,h:bh,UIColor.systemBlue)
+        //        iroiro.setButtonProperty(waveButton,x:10+bwd*2,y:bh0,w:bw,h:bh,UIColor.systemBlue)
+        
+        //        calcButton.frame = CGRect(x:10+bwd*3-5,y:bh0-bh/2-distance/2-5,width:bw+10,height: bh+10)
+        //        stopButton.frame = CGRect(x:10+bwd*3-5,y:bh0-bh/2-distance/2-5,width:bw+10,height: bh+10)
+        iroiro.setButtonProperty(pauseARKitButton,x:10+bwd*3,y:bh0-bh/2-distance/2,w:bw,h: bh,UIColor.systemBlue)
+        //        iroiro.setButtonProperty(stopButton,x:10+bwd*3,y:bh0-bh/2-distance/2,w:bw,h: bh,UIColor.systemBlue)
+        //        stopButton.frame = CGRect(x:10+bwd*3,y:bh0-bh/2-distance/2,width:bw,height: bh)
+        
+        iroiro.setButtonProperty(settingButton,x:10+bwd*4,y:bh0,w:bw,h:bh,UIColor.systemBlue)
+        iroiro.setButtonProperty(helpButton,x:10+bwd*5,y:bh0,w:bw,h:bh,UIColor.systemBlue)
+        iroiro.setButtonProperty(cameraButton,x:10+bwd*6,y:bh0,w:bw,h:bh,UIColor.systemRed)
         waveSlider.frame=CGRect(x:sp,y:by-bh,width: vw-sp*2,height:20)//とりあえず
         let sliderHeight=waveSlider.frame.height
         let sliderY=by-sp*2-sliderHeight
@@ -561,10 +606,44 @@ final class ViewController: UIViewController {
         waveBoxView.frame=CGRect(x:0,y:sliderY-vw*180/320-sp*2,width:vw,height: vw*180/320)
         vHITBoxView.frame=CGRect(x:0,y:sliderY-vw*180/320-sp*2-vw*2/5-sp*2,width :vw,height:vw*2/5)
 
-        progressFaceView.frame=CGRect(x:20,y:top+20,width: vw-40,height: 20)
-        progressEyeView.frame=CGRect(x:20,y:top+50,width: vw-40,height: 20)
-//        progressEyeView.isHidden=true
-//        progressFaceView.isHidden=true
+        
+        //        iroiro.setButtonProperty(backwardButton,x:10+bwd*4,y:bh1,w:bw,h:bh,UIColor.systemOrange)
+        //        iroiro.setButtonProperty(playButton,x:10+bwd*5,y:bh1,w:bw,h:bh,UIColor.systemOrange)
+        //        iroiro.setButtonProperty(forwardButton,x:10+bwd*6,y:bh1,w:bw,h:bh,UIColor.systemOrange)
+        //        iroiro.setButtonProperty(changeModeButton,x:10,y:bh1,w:bh*3+distance*2,h:bh,UIColor.darkGray)
+        //        if videoDate.count == 0{
+        //            playButton.isEnabled=false
+        //            forwardButton.isEnabled=false
+        //            backwardButton.isEnabled=false
+        //            currentVideoDate.text="tap button in lower right corner"
+        //            videoFps.text="to record the video of the eye"
+    }*/
+    //        showVideoIroiro(num: 0)
+
+    func setButtons(){
+        let top=CGFloat(UserDefaults.standard.float(forKey: "top"))
+        let bottom=CGFloat( UserDefaults.standard.float(forKey: "bottom"))
+        let vw=view.bounds.width
+        let vh=view.bounds.height
+        let sp:CGFloat=5   //vw/36
+        let bw=(vw-sp*10)/7
+        let bh=bw
+        let by=vh-bottom-sp*2-bh
+        iroiro.setButtonProperty(mailButton,x:sp*2+bw*0,y:by,w:bw,h:bh,UIColor.systemBlue)
+        iroiro.setButtonProperty(saveButton,x:sp*3+bw*1,y:by,w:bw,h:bh,UIColor.systemBlue)
+        iroiro.setButtonProperty(pauseButton,x:sp*4+bw*2,y:by,w:bw,h: bh,UIColor.systemBlue)
+        iroiro.setButtonProperty(ARKitButton,x:sp*5+bw*3,y:by,w:bw,h:bh,UIColor.systemBlue)
+        iroiro.setButtonProperty(settingButton,x:sp*6+bw*4,y:by,w:bw,h: bh,UIColor.systemBlue)
+        iroiro.setButtonProperty(helpButton,x:sp*7+bw*5,y:by,w:bw,h: bh,UIColor.systemBlue)
+        iroiro.setButtonProperty(deleteButton,x:sp*8+bw*6,y:by,w:bw,h: bh,UIColor.systemRed)
+        waveBoxView.frame=CGRect(x:0,y:vh*340/568-vw*90/320,width:vw,height: vw*180/320)
+        vHITBoxView.frame=CGRect(x:0,y:vh*160/568-vw/5,width :vw,height:vw*2/5)
+        waveSlider.frame=CGRect(x:sp*2,y:by-2*bh,width: vw-sp*4,height:20)//とりあえず
+        let sliderHeight=waveSlider.frame.height
+        waveSlider.frame=CGRect(x:sp*2,y:(waveBoxView.frame.maxY+by)/2-sliderHeight/2,width:vw-sp*4,height:sliderHeight)
+        
+        progressFaceView.frame=CGRect(x:20,y:(top+vHITBoxView.frame.minY)/2-10,width: vw-40,height: 20)
+        progressEyeView.frame=CGRect(x:20,y:(top+vHITBoxView.frame.minY)/2+10,width: vw-40,height: 20)
     }
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
@@ -585,6 +664,9 @@ final class ViewController: UIViewController {
     }
 //    var initOnWaveSlideF:Bool=true
     @objc func onWaveSliderValueChange(){
+        if waves.count<60{
+            return
+        }
         let endCnt=Int(waveSlider.value)
         waveBoxView.layer.sublayers?.removeLast()
         let startCnt = endCnt-60//点の数
@@ -636,7 +718,7 @@ final class ViewController: UIViewController {
         let waveView = UIImageView(image: drawImage)
 //        vhitBoxView = UIImageView(image: vhitBoxViewImage)
         waveBoxView.addSubview(waveView)
-        print(view.subviews.count)
+//        print(view.subviews.count)
     }
     
     func setWaveSlider(){
@@ -814,9 +896,11 @@ extension ViewController: ARSessionDelegate {
         lastFaceX=faceXTemp
         lastLtEyeX=ltEyeXTemp
         lastRtEyeX=rtEyeXTemp
+#if DEBUG
         let lag=CFAbsoluteTimeGetCurrent()-lastTime
         print(lag)
         lastTime=CFAbsoluteTimeGetCurrent()
+#endif
         //60hz前後のことが多いが、30hzになってしまうことがある。どうする？
 
         //        let logger = Logger()
