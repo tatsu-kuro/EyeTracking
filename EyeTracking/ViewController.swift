@@ -107,24 +107,17 @@ final class ViewController: UIViewController {
 //        let widthRange:Int=30
         let naf:Int=5//84ms  waveWidth*60/1000
         let raf:Int=2//33ms  widthRange*60/1000
-        let sl:CGFloat=0//slope
-        let g1=waves[i+1].face-waves[i].face// st:i+1)-g5(st:i)
-        let g2=waves[i+2].face-waves[i+1].face// st:i+1)-g5(st:i)
-        let g3=waves[i+3].face-waves[i+2].face// st:i+1)-g5(st:i)
-        let ga=waves[i+naf-raf+1].face-waves[i+naf-raf].face// st:i+1)-g5(st:i)
-        let gb=waves[i+naf-raf+2].face-waves[i+naf-raf+1].face// st:i+1)-g5(st:i)
-        let gc=waves[i+naf+raf+1].face-waves[i+naf+raf].face// st:i+1)-g5(st:i)
-        let gd=waves[i+naf+raf+2].face-waves[i+naf+raf+1].face// st:i+1)-g5(st:i)
-//
-//        if       g1 > 4  && g2>g1+1 && g3>g2+1 && ga >  sl && gb > sl  && gc < -sl  && gd < -sl  {
-//            return -1
-//        }else if g1 < -4 && g2<g1+1 && g3<g2+1 && ga < -sl && gb < -sl && gc >  sl  && gd >  sl{
-//            return 1
-//        }
-        //下のように変更すると小さな波も拾える
-//        if       g1 > 0  && g2>g1 && g3>g2 {
-//            return -1
-//        }
+        let sl:CGFloat=0.002//slope
+        if waves[i].face>0.001 || waves[i].face < -0.001{
+            return 0
+        }
+        let g1=waves[i+1].face-waves[i].face
+        let g2=waves[i+2].face-waves[i+1].face
+        let g3=waves[i+3].face-waves[i+2].face
+        let ga=waves[i+naf-raf+1].face-waves[i+naf-raf].face
+        let gb=waves[i+naf-raf+2].face-waves[i+naf-raf+1].face
+        let gc=waves[i+naf+raf+1].face-waves[i+naf+raf].face
+        let gd=waves[i+naf+raf+2].face-waves[i+naf+raf+1].face
         
         if       g1 > 0  && g2>g1 && g3>g2 && ga >  sl && gb > sl  && gc < -sl  && gd < -sl  {
             return 1
@@ -290,106 +283,6 @@ final class ViewController: UIViewController {
         present(alert, animated: true, completion: nil)
     }
     
-//    var path2albumDoneFlag:Bool=false//不必要かもしれないが念の為
-//    func savePath2album(name:String,path:String){
-//        path2albumDoneFlag=false
-//        savePath2album_sub(name:name,path: path)
-//        while path2albumDoneFlag==false{
-//            sleep(UInt32(0.2))
-//        }
-//    }
-//    func getPHAssetcollection(albumTitle:String)->PHAssetCollection{
-//        let requestOptions = PHImageRequestOptions()
-//        requestOptions.isSynchronous = true
-//        requestOptions.isNetworkAccessAllowed = false
-//        requestOptions.deliveryMode = .highQualityFormat //これでもicloud上のvideoを取ってしまう
-//        //アルバムをフェッチ
-//        let assetFetchOptions = PHFetchOptions()
-//        assetFetchOptions.predicate = NSPredicate(format: "title == %@", albumTitle)
-//        let assetCollections = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .smartAlbumVideos, options: assetFetchOptions)
-//        //ここはunwindから呼ばれる。アルバムはprepareで作っているはず？
-//        //        if (assetCollections.count > 0) {
-//        //同じ名前のアルバムは一つしかないはずなので最初のオブジェクトを使用
-//        return assetCollections.object(at:0)
-//    }
-//    func savePath2album_sub(name:String,path:String){
-//        if let dir = FileManager.default.urls( for: .documentDirectory, in: .userDomainMask ).first {
-//            let fileURL = dir.appendingPathComponent( path )
-//            PHPhotoLibrary.shared().performChanges({ [self] in
-//                let assetRequest = PHAssetChangeRequest.creationRequestForAssetFromImage(atFileURL: fileURL)!
-//                let albumChangeRequest = PHAssetCollectionChangeRequest(for: getPHAssetcollection(albumTitle: name))
-//                let placeHolder = assetRequest.placeholderForCreatedAsset
-//                albumChangeRequest?.addAssets([placeHolder!] as NSArray)
-//            }) { (isSuccess, error) in
-//                if isSuccess {
-//                    self.path2albumDoneFlag=true
-//                    // 保存成功
-//                } else {
-//                    self.path2albumDoneFlag=true
-//                    // 保存失敗
-//                }
-//            }
-//        }
-//    }
-//    func saveJpegImage2path(image:UIImage,path:String) {//imageを保存
-//        if let dir = FileManager.default.urls( for: .documentDirectory, in: .userDomainMask ).first {
-//            let path_url = dir.appendingPathComponent( path )
-//            let jpegImageData = image.jpegData(compressionQuality: 1.0)
-//            do {
-//                try jpegImageData!.write(to: path_url, options: .atomic)
-////                saving2pathFlag=false
-//            } catch {
-//                print("gyroData.txt write err")//エラー処理
-//            }
-//        }
-//    }
-//    func existFile(aFile:String)->Bool{
-//        if let dir = FileManager.default.urls( for: .documentDirectory, in: .userDomainMask ).first {
-//
-//            let path_url = dir.appendingPathComponent( aFile )
-//            let fileManager = FileManager.default
-//            if fileManager.fileExists(atPath: path_url.path){
-//                return true
-//            }else{
-//                return false
-//            }
-//
-//        }
-//        return false
-//    }
-//    var idString:String=""
-//    @IBAction func onSaveButton(_ sender: Any) {
-//        if vHITwaves.count < 1 {
-//            return
-//        }
-//        let alert = UIAlertController(title: "vHIT96da", message: "Input ID", preferredStyle: .alert)
-//        let saveAction = UIAlertAction(title: "OK", style: .default) { [self] (action:UIAlertAction!) -> Void in
-//            // 入力したテキストをコンソールに表示
-//            let textField = alert.textFields![0] as UITextField
-//            idString = textField.text!
-//            let drawImage = drawVHIT(width:500*4,height:200*4)
-//            //まずtemp.pngに保存して、それをvHIT_VOGアルバムにコピーする
-//            saveJpegImage2path(image: drawImage, path: "temp.jpeg")
-//            while existFile(aFile: "temp.jpeg") == false{
-//                sleep(UInt32(0.1))
-//            }
-//            savePath2album(name:Wave96da,path: "temp.jpeg")
-////            calcDrawVHIT(tuple: false)//idnumber表示のため,waveTupleは変更しない
-////            // イメージビューに設定する
-////            //            UIImageWriteToSavedPhotosAlbum(drawImage, nil, nil, nil)
-////            nonsavedFlag = false //解析結果がsaveされたのでfalse
-//        }
-//
-//        let cancelAction = UIAlertAction(title: "Cancel", style: .default) { (action:UIAlertAction!) -> Void in
-//        }
-//        // UIAlertControllerにtextFieldを追加
-//        alert.addTextField { (textField:UITextField!) -> Void in
-//            textField.keyboardType = UIKeyboardType.default//.numberPad
-//        }
-//        alert.addAction(cancelAction)//この行と下の行の並びを変えるとCancelとOKの左右が入れ替わる。
-//        alert.addAction(saveAction)
-//        present(alert, animated: true, completion: nil)
-//    }
     func drawVHIT(width w:CGFloat,height h:CGFloat) -> UIImage {
         let size = CGSize(width:w, height:h)
         var r:CGFloat=1//r:倍率magnification
@@ -527,7 +420,23 @@ final class ViewController: UIViewController {
             UIColor.black.setStroke()
             drawPathFace.stroke()
             drawPathFace.removeAllPoints()
+#if DEBUG
+            if vHITs[i].currDispOn==true{
+                var text:String=""
+                for j in 2..<10{
+                    if j==6{
+                        text += Int(-vHITs[i].face[j]*10000).description + ","
+                    }else{
+                        text += Int(-vHITs[i].face[j]*10000).description + ":"
+                    }
+                }
+                text.description.draw(at: CGPoint(x: 3*r, y: 15), withAttributes: [
+                    NSAttributedString.Key.foregroundColor : UIColor.black,
+                    NSAttributedString.Key.font : UIFont.monospacedDigitSystemFont(ofSize: 15*r, weight: UIFont.Weight.regular)])
+            }
+#endif
         }
+
         rightCnt.description.draw(at: CGPoint(x: 3*r, y: 0), withAttributes: [
                NSAttributedString.Key.foregroundColor : UIColor.black,
                NSAttributedString.Key.font : UIFont.monospacedDigitSystemFont(ofSize: 15*r, weight: UIFont.Weight.regular)])
@@ -790,7 +699,7 @@ final class ViewController: UIViewController {
             drawPath2.stroke()
             var text=waves[endCnt-1].date
             if arKitFlag==false{
-                text += "  n:" + endCnt.description + " face:" + Int(-waves[endCnt-1].face*100000).description + " eye:" + Int(-waves[endCnt-1].ltEye*100000).description
+                text += "  n:" + endCnt.description + " face:" + Int(-waves[endCnt-1].face*10000).description + " eye:" + Int(-waves[endCnt-1].ltEye*10000).description
             }
             text.draw(at:CGPoint(x:3,y:3),withAttributes: [
                 NSAttributedString.Key.foregroundColor : UIColor.black,
